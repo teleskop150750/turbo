@@ -40,6 +40,22 @@
     "vue-tsc": "^1.0.12"
   },
   "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": "./dist/ui.es.js",
+      "require": "./dist/ui.cjs.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./dist/styles.css": "./dist/styles.css",
+    "./dist/tokens/tokens.css": "./dist/tokens/tokens.css",
+    "./dist/fonts/fonts.css": "./dist/fonts/fonts.css",
+    "./dist/theme/theme.css": "./dist/theme/theme.css",
+    "./*": "./*"
+  },
   "main": "./src/index.js",
-  "types": "./src/index.ts"
+  "module": "./dist/ui.es.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ]
 }
