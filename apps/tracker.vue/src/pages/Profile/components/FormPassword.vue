@@ -1,0 +1,156 @@
+<script setup>
+import { NButton, NForm, NFormItem, NInput } from '@nado/nado-vue-ui'
+import { ElCard, ElCol, ElRow } from 'element-plus'
+import { reactive, ref } from 'vue'
+
+import VTitle from '../../../components/VTitle/VTitle.vue'
+import { useLoading } from '../../../composables/useLoading.js'
+import { useNotification } from '../../../composables/useNotification.js'
+import { UserService } from '../../../services/UserService.js'
+
+const isSending = ref(false)
+const formRef = ref()
+const { open: openLoading, close: closeLoading } = useLoading()
+const { open: openNotification } = useNotification()
+
+const formData = reactive({
+  currentPassword: '',
+  password: '',
+  passwordConfirm: '',
+})
+
+const formError = reactive({
+  currentPassword: '',
+  password: '',
+  passwordConfirm: '',
+})
+
+async function submitForm(formElement) {
+  if (isSending.value === true) {
+    return
+  }
+
+  if (!formElement) {
+    return
+  }
+
+  isSending.value = true
+  openLoading()
+
+  let isValid = true
+
+  await formElement.validate((valid) => {
+    if (!valid) {
+      isValid = false
+    }
+  })
+
+  if (!isValid) {
+    isSending.value = false
+    closeLoading()
+
+    return
+  }
+
+  try {
+    await UserService.changePassword(formData)
+    openNotification({
+      title: 'Успех',
+      message: 'Пароль изменен',
+      type: 'success',
+    })
+    resetForm()
+  } catch (error) {
+    if (error.data.errors) {
+      Object.entries(error.data.errors).forEach(([key, errors]) => {
+        if (Object.hasOwn(formError, key)) {
+          const [firstError] = errors
+
+          formError[key] = firstError
+        }
+      })
+    }
+
+    if (error.data.message) {
+      openNotification({
+        title: 'Error',
+        message: error.data.message,
+        type: 'error',
+      })
+    }
+  } finally {
+    isSending.value = false
+    closeLoading()
+  }
+}
+
+function resetForm(formElement) {
+  if (!formElement) {
+    return
+  }
+
+  formElement.resetFields()
+}
+
+const rules = reactive({
+  currentPassword: [{ required: true, message: 'Поле обязательно для заполнения', trigger: 'blur' }],
+  password: [{ required: true, validator: validatePassword, trigger: 'blur' }],
+  passwordConfirm: [{ required: true, validator: validatePasswordConfirm, trigger: 'blur' }],
+})
+
+function validatePassword(rule, value, callback) {
+  if (value === '') {
+    callback(new Error('Поле обязательно для заполнения'))
+  } else if (formData.passwordConfirm !== '') {
+    formRef.value.validateField('passwordConfirm', () => null)
+    callback()
+  }
+}
+
+function validatePasswordConfirm(rule, value, callback) {
+  if (value === '') {
+    callback(new Error('Поле обязательно для заполнения'))
+  } else if (value !== formData.password) {
+    callback(new Error('Пароли не совпадают!'))
+  } else {
+    formRef.value.validateField('password', () => null)
+    callback()
+  }
+}
+</script>
+
+<template>
+  <ElCard shadow="never">
+    <template #header>
+      <VTitle level="2">Изменить пароль</VTitle>
+    </template>
+    <NForm ref="formRef" :model="formData" :rules="rules" label-position="top">
+      <ElRow :gutter="20">
+        <ElCol :span="12">
+          <NFormItem label="Текущий пароль" prop="currentPassword" :error="formError.currentPassword">
+            <NInput v-model="formData.currentPassword" type="password" autocomplete="off" />
+          </NFormItem>
+        </ElCol>
+      </ElRow>
+      <ElRow :gutter="20">
+        <ElCol :span="12">
+          <NFormItem label="Пароль" prop="password" :error="formError.password">
+            <NInput v-model="formData.password" type="password" autocomplete="off" />
+          </NFormItem>
+        </ElCol>
+      </ElRow>
+      <ElRow :gutter="20">
+        <ElCol :span="12">
+          <NFormItem label="Новый пароль" prop="passwordConfirm" :error="formError.passwordConfirm">
+            <NInput v-model="formData.passwordConfirm" type="password" autocomplete="off" />
+          </NFormItem>
+        </ElCol>
+      </ElRow>
+      <ElRow>
+        <ElCol class="form-actions">
+          <NButton appearance="primary" @click="submitForm(formRef)"> Обновить </NButton>
+        </ElCol>
+      </ElRow>
+    </NForm>
+  </ElCard>
+</template>
