@@ -357,7 +357,7 @@ export const NFormItem = createComponent({
           </labelComp.value>
         )}
 
-        <div class={ns.e('content')}>
+        <div class={[ns.e('content'), props.hideHint && ns.em('content', 'hide-hint')]}>
           <div class={ns.e('content-inner')}>{hSlot(slots.default)}</div>
 
           <Transition name={`${ns.namespace}-zoom-in-top`}>

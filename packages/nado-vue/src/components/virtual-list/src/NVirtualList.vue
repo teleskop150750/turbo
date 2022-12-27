@@ -32,13 +32,7 @@ defineOptions({
   name: 'NVirtualList',
 })
 
-const itemsCount = computed(() => {
-  if (props.total !== undefined) {
-    return props.total
-  }
-
-  return props.data.length
-})
+const itemsCount = computed(() => props.data.length)
 /** @type{import('vue').ComputedRef<number>} */
 const totalSize = getTotalSize()
 

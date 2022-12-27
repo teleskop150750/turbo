@@ -1,26 +1,51 @@
 import { http } from '../utils/http.js'
 
 export const TaskService = {
+  show(id) {
+    return http.get(`api/v1/tasks/${id}`)
+  },
+
   create(payload) {
-    return http.post('api/v1/create-task', payload)
+    return http.post('api/v1/tasks', payload)
   },
 
   delete(id) {
     return http.post(`api/v1/delete-task/${id}`)
   },
 
-  update(payload) {
-    return http.post('api/v1/update-task', payload)
+  update(id, payload) {
+    return http.put(`api/v1/tasks/${id}`, payload)
   },
 
-  getTask(id) {
-    return http.get(`api/v1/task-info/${id}`)
+  getTasks() {
+    return http.get('api/v1/tasks')
   },
 
-  getAvailableTasks() {
-    return http.get('api/v1/available-tasks-for-me')
+  getTasksAuthor() {
+    return http.get('api/v1/tasks-author')
   },
 
+  getTasksExecutor() {
+    return http.get('api/v1/tasks-executor')
+  },
+
+  getTasksUnassembled() {
+    return http.get('api/v1/tasks-unassembled')
+  },
+
+  getFolderMeTasks() {
+    return http.get('api/v1/folder-me/tasks')
+  },
+
+  getFolderSharedTasks() {
+    return http.get('api/v1/folder-shared/tasks')
+  },
+
+  getFolderTasks(folderId) {
+    return http.get(`api/v1/folder/${folderId}/tasks`)
+  },
+
+  /// ////////////////
   getMainTasks() {
     return http.get('api/v1/tasks-created-by-me')
   },

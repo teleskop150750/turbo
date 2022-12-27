@@ -1,7 +1,8 @@
 <script setup>
 import { NButton } from '@nado/nado-vue-ui'
-import { ElCard } from 'element-plus'
+import { ElCard, ElCol, ElRow } from 'element-plus'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 import VTitle from '../../../components/VTitle/VTitle.vue'
 import { useLoading } from '../../../composables/useLoading.js'
@@ -10,6 +11,7 @@ import { UserService } from '../../../services/UserService.js'
 import { useUserStore } from '../../../store/user.js'
 
 const userStore = useUserStore()
+const router = useRouter()
 
 const isSending = ref(false)
 const { open: openLoading, close: closeLoading } = useLoading()
@@ -24,21 +26,21 @@ async function verifyEmail() {
   openLoading()
 
   try {
-    const url = new URLSearchParams(window.location.search).get('api_url')
+    const params = Object.fromEntries(new URLSearchParams(window.location.search).entries())
 
-    await UserService.verifyEmail(url)
-
+    await UserService.verifyEmail(params)
     openNotification({
       title: 'Успех',
       message: 'Подтверждение прошло успешно',
       type: 'success',
     })
     userStore.verify()
+    router.push({ name: 'home' })
   } catch (error) {
-    if (error.data.message) {
+    if (error.response.data.title) {
       openNotification({
         title: 'Error',
-        message: error.data.message,
+        message: error.response.data.title,
         type: 'error',
       })
     }
@@ -51,12 +53,12 @@ async function verifyEmail() {
 
 <template>
   <div class="verification-notification-page">
-    <ElCard shadow="never" class="verification-notification-page__card">
+    <ElCard shadow="never" class="card-verification-notification verification-notification-page__card">
       <template #header>
-        <VTitle>Подтвердить почту</VTitle>
+        <VTitle class="verification-notification-page__title">Подтвердить почту</VTitle>
       </template>
       <ElRow>
-        <ElCol class="form-actions">
+        <ElCol class="card-verification-notification__actions">
           <div>
             <NButton @click="verifyEmail">Подтвердить</NButton>
           </div>
@@ -81,5 +83,14 @@ async function verifyEmail() {
 
 .verification-notification-page__card {
   width: 600px;
+}
+
+.verification-notification-page__title {
+  margin: 0;
+}
+
+.card-verification-notification__actions {
+  display: flex;
+  justify-content: space-between;
 }
 </style>

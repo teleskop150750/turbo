@@ -1,20 +1,12 @@
 import { http } from '../utils/http.js'
 
 export const FolderService = {
-  update(payload) {
-    return http.post('api/v1/update-folder', payload)
-  },
-
   delete(id) {
     return http.post('api/v1/delete-folder', {}, { params: { id } })
   },
 
-  create(payload) {
-    return http.post('api/v1/create-folder', payload)
-  },
-
   getFolder(id) {
-    return http.get('api/v1/folder-info', { params: { id } })
+    return http.get(`api/v1/folders/${id}`)
   },
 
   getWorkspaceFoldersForMe() {
@@ -25,7 +17,15 @@ export const FolderService = {
     return http.get('api/v1/shared-folders-for-me')
   },
 
-  getAvailableFoldersForMe() {
-    return http.get('api/v1/available-folders-for-me')
+  getFolders() {
+    return http.get('api/v1/folders')
+  },
+
+  create(payload) {
+    return http.post('api/v1/folders', payload)
+  },
+
+  update(id, payload) {
+    return http.put(`api/v1/folders/${id}`, payload)
   },
 }

@@ -15,7 +15,7 @@
 
     color: var(--n-text-color-regular);
     font-size: var(--n-sys-font-size-small);
-    line-height: 34px;
+    line-height: 1;
     white-space: nowrap;
     text-overflow: ellipsis;
 

@@ -1,5 +1,5 @@
 <script setup>
-import { NButton, NDropdown, NDropdownItem, NDropdownMenu, NIconPersonCircle } from '@nado/nado-vue-ui'
+import { NAvatar, NButton, NDropdown, NDropdownItem, NDropdownMenu, NIconPersonCircle } from '@nado/nado-vue-ui'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -31,15 +31,14 @@ function toggle() {
   <template v-if="user">
     <NDropdown>
       <button class="n-header-menu-user-trigger" type="button" aria-label="menu" @click="toggle">
-        <NIconPersonCircle class="n-header-menu-user-trigger__icon" />
+        <NAvatar :user-name="`${user.fullName.firstName[0]}. ${user.fullName.lastName}`" />
+        <!-- <NIconPersonCircle class="n-header-menu-user-trigger__icon" /> -->
       </button>
       <template #dropdown>
         <NDropdownMenu>
-          <NDropdownItem>
-            <div class="n-header-menu-user__title">
-              {{ `${user.firstName[0]}. ${user.lastName}` }}
-            </div>
-          </NDropdownItem>
+          <div class="n-header-menu-user__title">
+            {{ `${user.fullName.firstName[0]}. ${user.fullName.lastName}` }}
+          </div>
           <NDropdownItem>
             <NButton :icon="NIconPersonCircle" :to="{ name: 'profile' }" link label="Профиль" @click="close" />
           </NDropdownItem>
@@ -77,6 +76,8 @@ function toggle() {
 
 .n-header-menu-user__title {
   margin-bottom: 0.5rem;
+  padding: 0 1rem;
+  padding-top: 0.5rem;
 
   font-weight: 700;
 }

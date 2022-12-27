@@ -4,6 +4,7 @@ import { loadLayout } from './layout/loadLayout.js'
 import auth from './middleware/auth.middleware.js'
 import guest from './middleware/guest.middleware.js'
 import middlewarePipeline from './middleware/middlewarePipeline.js'
+import unverify from './middleware/unverify.middleware.js'
 import verify from './middleware/verify.middleware.js'
 
 const routes = [
@@ -19,7 +20,7 @@ const routes = [
   {
     path: '/login',
     name: 'login',
-    component: () => import('../pages/Login.vue'),
+    component: () => import('../pages/Auth/Login/IndexView.vue'),
     meta: {
       layout: 'login',
       middleware: [guest],
@@ -28,7 +29,7 @@ const routes = [
   {
     path: '/register',
     name: 'register',
-    component: () => import('../pages/Register.vue'),
+    component: () => import('../pages/Auth/Register/IndexView.vue'),
     meta: {
       layout: 'login',
       middleware: [guest],
@@ -58,7 +59,7 @@ const routes = [
     component: () => import('../pages/Auth/VerifyEmail/IndexView.vue'),
     meta: {
       layout: 'login',
-      middleware: [auth],
+      middleware: [auth, unverify],
     },
   },
   {
@@ -71,51 +72,6 @@ const routes = [
     },
   },
   {
-    path: '/archive',
-    name: 'archive',
-    component: () => import('../pages/Archive/Index.vue'),
-    meta: {
-      layout: 'default',
-      middleware: [auth],
-    },
-  },
-  {
-    path: '/workspace',
-    name: 'workspace',
-    component: () => import('../pages/Workspace/Index.vue'),
-    meta: {
-      layout: 'default',
-      middleware: [auth],
-    },
-  },
-  {
-    path: '/workspace-gantt',
-    name: 'workspace-gantt',
-    component: () => import('../pages/Workspace/Gantt.vue'),
-    meta: {
-      layout: 'default',
-      middleware: [auth],
-    },
-  },
-  {
-    path: '/shared',
-    name: 'shared',
-    component: () => import('../pages/Shared/Index.vue'),
-    meta: {
-      layout: 'default',
-      middleware: [auth],
-    },
-  },
-  // {
-  //   path: '/shared-gantt',
-  //   name: 'shared-gantt',
-  //   component: () => import('../pages/Shared/Gantt.vue'),
-  //   meta: {
-  //     layout: 'default',
-  //     middleware: [auth],
-  //   },
-  // },
-  {
     path: '/profile',
     name: 'profile',
     component: () => import('../pages/Profile/IndexView.vue'),
@@ -124,10 +80,11 @@ const routes = [
       middleware: [auth],
     },
   },
+
   {
     path: '/folders/create',
     name: 'folders-create',
-    component: () => import('../pages/Folders/Create.vue'),
+    component: () => import('../pages/Folder/Create/IndexView.vue'),
     meta: {
       layout: 'default',
       middleware: [auth],
@@ -136,17 +93,18 @@ const routes = [
   {
     path: '/folders/update/:id',
     name: 'folders-update',
-    component: () => import('../pages/Folders/Update.vue'),
+    component: () => import('../pages/Folder/Update/IndexView.vue'),
     meta: {
       layout: 'default',
       middleware: [auth],
     },
     props: true,
   },
+
   {
     path: '/tasks/create',
     name: 'tasks-create',
-    component: () => import('../pages/Tasks/Create.vue'),
+    component: () => import('../pages/Task/Create/IndexView.vue'),
     meta: {
       layout: 'default',
       middleware: [auth],
@@ -155,35 +113,136 @@ const routes = [
   {
     path: '/tasks/update/:id',
     name: 'tasks-update',
-    component: () => import('../pages/Tasks/Update.vue'),
+    component: () => import('../pages/Task/Update/IndexView.vue'),
     meta: {
       layout: 'default',
       middleware: [auth],
     },
     props: true,
   },
+  // {
+  //   path: '/archive',
+  //   name: 'archive',
+  //   component: () => import('../pages/Archive/Index.vue'),
+  //   meta: {
+  //     layout: 'default',
+  //     middleware: [auth],
+  //   },
+  // },
+  // {
+  //   path: '/workspace',
+  //   name: 'workspace',
+  //   component: () => import('../pages/Workspace/Index.vue'),
+  //   meta: {
+  //     layout: 'default',
+  //     middleware: [auth],
+  //   },
+  // },
+  // {
+  //   path: '/workspace-gantt',
+  //   name: 'workspace-gantt',
+  //   component: () => import('../pages/Workspace/Gantt.vue'),
+  //   meta: {
+  //     layout: 'default',
+  //     middleware: [auth],
+  //   },
+  // },
   {
-    path: '/tasks/created',
-    name: 'tasks-created',
-    component: () => import('../pages/Tasks/Created/Index.vue'),
+    path: '/all',
+    name: 'tasks-all',
+    component: () => import('../pages/Tasks/All/IndexView.vue'),
     meta: {
       layout: 'default',
       middleware: [auth],
     },
   },
   {
-    path: '/tasks/main',
-    name: 'tasks-main',
-    component: () => import('../pages/Tasks/Main/Index.vue'),
+    path: '/author',
+    name: 'tasks-author',
+    component: () => import('../pages/Tasks/Author/IndexView.vue'),
     meta: {
       layout: 'default',
       middleware: [auth],
     },
   },
+  {
+    path: '/executor',
+    name: 'tasks-executor',
+    component: () => import('../pages/Tasks/Executor/IndexView.vue'),
+    meta: {
+      layout: 'default',
+      middleware: [auth],
+    },
+  },
+  {
+    path: '/unassembled',
+    name: 'tasks-unassembled',
+    component: () => import('../pages/Tasks/Unassembled/IndexView.vue'),
+    meta: {
+      layout: 'default',
+      middleware: [auth],
+    },
+  },
+  {
+    path: '/folder-me',
+    name: 'folder-me',
+    component: () => import('../pages/Tasks/FolderMe/IndexView.vue'),
+    meta: {
+      layout: 'default',
+      middleware: [auth],
+    },
+  },
+  {
+    path: '/folder-shared',
+    name: 'folder-shared',
+    component: () => import('../pages/Tasks/FolderShared/IndexView.vue'),
+    meta: {
+      layout: 'default',
+      middleware: [auth],
+    },
+  },
+  {
+    path: '/folders/:id/tasks',
+    name: 'folder-tasks',
+    component: () => import('../pages/Tasks/Folder/IndexView.vue'),
+    meta: {
+      layout: 'default',
+      middleware: [auth],
+    },
+    props: true,
+  },
+  // {
+  //   path: '/shared',
+  //   name: 'shared',
+  //   component: () => import('../pages/Shared/Index.vue'),
+  //   meta: {
+  //     layout: 'default',
+  //     middleware: [auth],
+  //   },
+  // },
+
+  // {
+  //   path: '/created-tasks',
+  //   name: 'created-tasks',
+  //   component: () => import('../pages/Tasks/Created/Index.vue'),
+  //   meta: {
+  //     layout: 'default',
+  //     middleware: [auth],
+  //   },
+  // },
+  // {
+  //   path: '/main-tasks',
+  //   name: 'main-tasks',
+  //   component: () => import('../pages/Tasks/Main/Index.vue'),
+  //   meta: {
+  //     layout: 'default',
+  //     middleware: [auth],
+  //   },
+  // },
   {
     path: '/search',
     name: 'search',
-    component: () => import('../pages/Search.vue'),
+    component: () => import('../pages/Search/IndexView.vue'),
     meta: {
       layout: 'default',
       middleware: [auth],

@@ -39,9 +39,10 @@ provide(LAYOUT_DEFAULT_KEY, {
 <style>
 .n-layout {
   display: grid;
+  grid-template-rows: 1fr;
   grid-template-columns: min-content 1fr;
 
-  height: 100vh;
+  /* height: 100dvh; */
 }
 
 .n-layout__body {
@@ -51,7 +52,7 @@ provide(LAYOUT_DEFAULT_KEY, {
 }
 
 .n-layout__body-main {
-  height: calc(100vh - 60px);
+  height: calc(100% - 60px);
   padding: 0 1rem 1rem;
 }
 </style>

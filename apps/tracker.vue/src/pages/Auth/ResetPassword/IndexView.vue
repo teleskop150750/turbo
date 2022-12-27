@@ -2,6 +2,7 @@
 import { NButton, NForm, NFormItem, NInput } from '@nado/nado-vue-ui'
 import { ElCard, ElCol, ElRow } from 'element-plus'
 import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 import VTitle from '../../../components/VTitle/VTitle.vue'
 import { useLoading } from '../../../composables/useLoading.js'
@@ -10,6 +11,7 @@ import { UserService } from '../../../services/UserService.js'
 import { useUserStore } from '../../../store/user.js'
 
 const userStore = useUserStore()
+const router = useRouter()
 
 const formRef = ref()
 const isSending = ref(false)
@@ -63,11 +65,12 @@ async function resetPassword(formElement) {
       type: 'success',
     })
     userStore.verify()
+    router.push({ name: 'login' })
   } catch (error) {
-    if (error.data.message) {
+    if (error.response.data.title) {
       openNotification({
         title: 'Error',
-        message: error.data.message,
+        message: error.response.data.title,
         type: 'error',
       })
     }
@@ -108,7 +111,7 @@ function validatePasswordConfirm(rule, value, callback) {
   <div class="reset-password-page">
     <ElCard shadow="never" class="reset-password-page__card">
       <template #header>
-        <VTitle>Сбросить пароль</VTitle>
+        <VTitle class="reset-password-page__title">Сбросить пароль</VTitle>
       </template>
       <NForm ref="formRef" class="form form--registration" :model="formData" :rules="rules">
         <ElRow :gutter="20">
@@ -121,25 +124,21 @@ function validatePasswordConfirm(rule, value, callback) {
         <ElRow :gutter="20">
           <ElCol :span="12">
             <NFormItem label="Пароль" prop="password" :error="formError.password">
-              <NInput v-model="formData.password" type="password" autocomplete="off" />
+              <NInput v-model="formData.password" type="password" autocomplete="off" show-password />
             </NFormItem>
           </ElCol>
         </ElRow>
         <ElRow :gutter="20">
           <ElCol :span="12">
             <NFormItem label="Подтверждение пароля" prop="passwordConfirm" :error="formError.passwordConfirm">
-              <NInput v-model="formData.passwordConfirm" type="password" autocomplete="off" />
+              <NInput v-model="formData.passwordConfirm" type="password" autocomplete="off" show-password />
             </NFormItem>
           </ElCol>
         </ElRow>
         <ElRow>
-          <ElCol class="reset-form-actions">
-            <div>
-              <NButton appearance="primary" @click="resetPassword(formRef)"> Сбросить </NButton>
-            </div>
-            <div>
-              <NButton :to="{ name: 'login' }"> Войти </NButton>
-            </div>
+          <ElCol class="form-actions">
+            <NButton appearance="primary" @click="resetPassword(formRef)"> Сбросить </NButton>
+            <NButton :to="{ name: 'login' }"> Войти </NButton>
           </ElCol>
         </ElRow>
       </NForm>
@@ -161,7 +160,11 @@ function validatePasswordConfirm(rule, value, callback) {
   width: 600px;
 }
 
-.reset-form-actions {
+.reset-password-page__title {
+  margin: 0;
+}
+
+.reset-password-page .form-actions {
   display: flex;
   justify-content: space-between;
 }

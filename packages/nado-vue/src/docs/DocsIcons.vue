@@ -14,7 +14,7 @@ function getName(rawName = '') {
       <template v-for="icon in Icons" :key="icon.name">
         <div class="icon-box">
           <component :is="icon" class="icon" />
-          <div class="icon-name">{{ getName(icon.name) }}</div>
+          <div class="icon-name">{{ getName(icon.parsedUserName) }}</div>
         </div>
       </template>
     </div>

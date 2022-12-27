@@ -1,39 +1,126 @@
 <script setup>
-import { NIconChevronDoubleLeft, NIconDelete } from '@nado/nado-vue-ui'
-import { getCurrentInstance, ref, watch } from 'vue'
+import { NScrollbar } from '@nado/nado-vue-ui'
+import { ElTree } from 'element-plus'
+import { computed, ref } from 'vue'
 
+import { useLoading } from '../../../../composables/useLoading.js'
+import { useNotification } from '../../../../composables/useNotification.js'
+import { FolderService } from '../../../../services/FolderService.js'
 import NIconLogo from '../../../icons/NIconLogo.vue'
-import NAsideMenuLink from './NAsideMenuLink.vue'
+import NMenuItem from './NMenuItem.vue'
 
-const isOpen = ref(false)
+const { open: openLoading, close: closeLoading } = useLoading()
+const { open: openNotification } = useNotification()
 
-// function open() {
-//   isOpen.value = true
-// }
+const folders = ref([])
 
-function close() {
-  isOpen.value = false
+const defaultProps = {
+  children: 'children',
+  label: 'name',
 }
 
-function toggle() {
-  isOpen.value = !isOpen.value
-}
-
-const vm = getCurrentInstance()
-
-watch(
-  () => ({
-    // eslint-disable-next-line unicorn/consistent-destructuring
-    ...vm.proxy.$route,
-  }),
-  () => {
-    close()
+const menu = [
+  {
+    id: 'Unassembled',
+    name: 'Неразобранные',
+    type: 'UNASSEMBLED',
+    parentId: null,
   },
-)
+  {
+    id: 'Executor',
+    name: 'Я исполнитель',
+    type: 'EXECUTOR',
+    parentId: null,
+  },
+  {
+    id: 'Author',
+    name: 'Я автор',
+    type: 'AUTHOR',
+    parentId: null,
+  },
+  {
+    id: 'All',
+    name: 'Все',
+    type: 'ALL',
+    parentId: null,
+  },
+  {
+    id: 'USER',
+    name: 'Личное',
+    type: 'ROOT_USER',
+    parentId: null,
+  },
+  {
+    id: 'SHARED',
+    name: 'Доступные',
+    type: 'ROOT_SHARED',
+    parentId: null,
+  },
+]
+
+const tree = computed(() => {
+  const items = [...folders.value, ...menu].filter((el) => ('type' in el ? el.type !== 'ROOT' : true))
+  const hashTable = {}
+  const result = []
+
+  items.forEach((item) => {
+    hashTable[item.id] = item
+    hashTable[item.id].children = []
+  })
+
+  Object.values(hashTable).forEach((hashItem) => {
+    const parentId = hashItem.parentId || null
+
+    if (!Object.hasOwn(hashTable, parentId)) {
+      // hashItem.parentId = null
+      result.push(hashItem)
+    } else {
+      hashTable[parentId].children.push(hashItem)
+    }
+  })
+
+  return result
+})
+
+const menuItemsRef = ref([])
+
+async function getFolders() {
+  const response = await FolderService.getFolders()
+
+  folders.value = response.data.data
+}
+
+async function getData() {
+  try {
+    await Promise.all([getFolders()])
+  } catch (error) {
+    if (error.data && error.data.title) {
+      openNotification({
+        title: 'Error',
+        message: error.data.title,
+        type: 'error',
+      })
+    }
+  }
+}
+
+async function getDataInit() {
+  openLoading()
+  await getData()
+  closeLoading()
+}
+
+getDataInit()
+
+function handlerBeforeEnter() {
+  menuItemsRef.value.forEach((el) => {
+    el.hideContextMenu()
+  })
+}
 </script>
 
 <template>
-  <aside class="n-aside" :class="[!isOpen && 'n-aside--close']">
+  <aside class="n-aside">
     <div class="n-aside__header">
       <RouterLink class="n-aside__header-link" :to="{ name: 'home' }">
         <span class="n-aside__header-link-icon">
@@ -42,68 +129,42 @@ watch(
         <span class="n-aside__header-link-text"> nado </span>
       </RouterLink>
     </div>
-    <ul class="n-aside__menu">
-      <li class="n-aside__menu-item">
-        <NAsideMenuLink :to="{ name: 'workspace' }" :compact="!isOpen">
-          <template #icon>
-            <NIconDelete />
+    <div class="n-aside__body">
+      <NScrollbar class="n-aside__body-scroll">
+        <ElTree
+          class="n-aside__tree"
+          :data="tree"
+          :props="defaultProps"
+          node-key="id"
+          default-expand-all
+          :expand-on-click-node="false"
+        >
+          <template #default="{ node, data }">
+            <NMenuItem
+              :ref="
+                (el) => {
+                  menuItemsRef.push(el)
+                }
+              "
+              :node="node"
+              :data="data"
+              @before-enter="handlerBeforeEnter"
+            />
           </template>
-          Личное
-        </NAsideMenuLink>
-      </li>
-
-      <li class="n-aside__menu-item">
-        <NAsideMenuLink :to="{ name: 'tasks-main' }" :compact="!isOpen">
-          <template #icon>
-            <NIconDelete />
-          </template>
-          Мои задачи
-        </NAsideMenuLink>
-      </li>
-      <li class="n-aside__menu-item">
-        <NAsideMenuLink :to="{ name: 'tasks-created' }" :compact="!isOpen">
-          <template #icon>
-            <NIconDelete />
-          </template>
-          Созданные мной
-        </NAsideMenuLink>
-      </li>
-
-      <li class="n-aside__menu-item">
-        <NAsideMenuLink :to="{ name: 'shared' }" :compact="!isOpen">
-          <template #icon>
-            <NIconDelete />
-          </template>
-          Доступные для меня
-        </NAsideMenuLink>
-      </li>
-
-      <li class="n-aside__menu-item">
-        <NAsideMenuLink :to="{ name: 'archive' }" :compact="!isOpen">
-          <template #icon>
-            <NIconDelete />
-          </template>
-          Корзина
-        </NAsideMenuLink>
-      </li>
-    </ul>
-    <div class="n-aside__footer">
-      <div class="n-aside__footer-toggle-wrapper">
-        <button class="n-aside__footer-toggle" type="button" @click="toggle">
-          <NIconChevronDoubleLeft class="n-aside__footer-toggle-icon" />
-        </button>
-      </div>
+        </ElTree>
+      </NScrollbar>
     </div>
   </aside>
 </template>
 
 <style>
 .n-aside {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: min-content 1fr;
+  grid-template-columns: 250px;
 
-  width: 280px;
-  height: 100%;
+  width: 250px;
+  height: 100vh;
   padding: 1.5rem 0;
 
   background-color: var(--n-sys-color-secondary-800);
@@ -111,10 +172,6 @@ watch(
   overflow: hidden;
 
   transition: width 0.3s;
-}
-
-.n-aside--close {
-  width: 78px;
 }
 
 .n-aside__header {
@@ -149,71 +206,25 @@ watch(
   padding: calc((54px - 32px) / 2);
 }
 
-.n-aside__header-link-icon svg {
-  display: block;
+.n-aside__body {
+  overflow: hidden;
+}
 
-  width: 100%;
+.n-aside__body-scroll {
   height: 100%;
 }
 
-.n-aside__header-link-text {
-  opacity: 1;
-
-  transition: opacity 0.3s;
-}
-
-.n-aside--close .n-aside__header-link-text {
-  opacity: 0;
-
-  transition: opacity 0.1s;
-}
-
-.n-aside__menu {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  gap: 12px;
-
-  width: 100%;
-  margin: 0;
-  padding: 0;
-
-  list-style: none;
-}
-
-.n-aside__footer {
-  display: flex;
-  justify-content: flex-end;
-
-  padding: 1.5rem 1.5rem 0;
-}
-
-.n-aside__footer-toggle-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  width: 30px;
-  height: 30px;
-}
-
-.n-aside__footer-toggle {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  width: 26px;
-  height: 26px;
-  margin: 0;
-  padding: 0;
-
+.n-aside__tree {
   color: var(--n-ref-palette-white);
 
-  border: 0;
-  border-radius: 4px;
+  background-color: transparent;
+}
 
-  background-color: var(--n-sys-color-secondary-400);
+.n-aside__tree .el-tree-node__content:hover {
+  background-color: hsl(216deg 8% 60% / 30%);
+}
 
-  cursor: pointer;
+.n-aside__tree .el-tree-node:focus > .el-tree-node__content {
+  background-color: hsl(216deg 8% 60% / 30%);
 }
 </style>

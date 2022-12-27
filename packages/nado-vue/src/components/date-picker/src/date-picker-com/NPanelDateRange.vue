@@ -19,7 +19,7 @@ import { TimePickPanel } from '../../../time-picker/index.js'
 import { useRangePicker } from '../composables/useRangePicker.js'
 import { panelDateRangeProps } from '../props/panel-date-range.js'
 import { getDefaultValue, isValidRange } from '../utils.js'
-import DateTable from './NDatePickerTable.vue'
+import NDatePickerTable from './NDatePickerTable.vue'
 
 const props = defineProps(panelDateRangeProps)
 const emit = defineEmits(['pick', 'set-picker-option', 'calendar-change', 'panel-change'])
@@ -588,27 +588,27 @@ emit('set-picker-option', ['handleClear', handleClear])
               <button
                 v-if="unlinkPanels"
                 type="button"
-                :disabled="!enableYearArrow"
+                :disabled="!enableMonthArrow"
                 :class="[drpNs.e('icon-btn'), { 'is-disabled': !enableYearArrow }]"
                 class="d-arrow-right"
-                @click="leftNextYear"
+                @click="leftNextMonth"
               >
                 <span class="n-icon"><NIconChevronRight /></span>
               </button>
               <button
                 v-if="unlinkPanels"
                 type="button"
-                :disabled="!enableMonthArrow"
+                :disabled="!enableYearArrow"
                 :class="[drpNs.e('icon-btn'), { 'is-disabled': !enableMonthArrow }]"
                 class="arrow-right"
-                @click="leftNextMonth"
+                @click="leftNextYear"
               >
-                <span class="n-icon"><NIconChevronDoubleRight /></span>
+              <span class="n-icon"><NIconChevronDoubleRight /></span>
               </button>
             </div>
             <div :class="drpNs.e('header-label')">{{ leftLabel }}</div>
           </div>
-          <DateTable
+          <NDatePickerTable
             selection-mode="range"
             :date="leftDate"
             :min-date="minDate"
@@ -643,7 +643,7 @@ emit('set-picker-option', ['handleClear', handleClear])
                 class="arrow-left"
                 @click="rightPrevMonth"
               >
-                <span class="n-icon"><NIconChevronDoubleLeft /></span>
+                <span class="n-icon"><NIconChevronLeft /></span>
               </button>
               <button type="button" :class="[drpNs.e('icon-btn'), drpNs.e('arrow-right')]" @click="rightNextMonth">
                 <span class="n-icon"><NIconChevronRight /></span>
@@ -653,7 +653,7 @@ emit('set-picker-option', ['handleClear', handleClear])
               </button>
             </div>
           </div>
-          <DateTable
+          <NDatePickerTable
             selection-mode="range"
             :date="rightDate"
             :min-date="minDate"

@@ -89,7 +89,7 @@ async function upload(rawFile) {
       file = hookResult
     } else {
       // @ts-ignore
-      file = new File([hookResult], rawFile.name, {
+      file = new File([hookResult], rawFile.parsedUserName, {
         type: rawFile.type,
       })
     }

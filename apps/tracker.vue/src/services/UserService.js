@@ -14,15 +14,20 @@ export const UserService = {
   },
 
   verifyEmail(path) {
-    return http.post(path)
+    return http.post(`api/v1/email/verify/${path.id}/${path.hash}`, null, {
+      params: {
+        signature: path.signature,
+        expires: path.expires,
+      },
+    })
   },
 
   register(payload) {
     return http.post('api/v1/register', payload)
   },
 
-  updateProfile(payload) {
-    return http.post('api/v1/update-me', payload)
+  updateMe(payload) {
+    return http.patch('api/v1/me', payload)
   },
 
   changePassword(payload) {

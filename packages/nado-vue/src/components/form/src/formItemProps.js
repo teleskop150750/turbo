@@ -41,4 +41,8 @@ export const formItemProps = {
     default: true,
   },
   size: sizeProp,
+  hideHint: {
+    type: Boolean,
+    default: false,
+  },
 }

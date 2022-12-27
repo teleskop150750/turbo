@@ -17,9 +17,9 @@ const { open: openLoading, close: closeLoading } = useLoading()
 const { open: openNotification } = useNotification()
 
 const formData = reactive({
-  firstName: user.value.firstName,
-  lastName: user.value.lastName,
-  patronymic: user.value.patronymic,
+  firstName: user.value.fullName.firstName,
+  lastName: user.value.fullName.lastName,
+  patronymic: user.value.fullName.patronymic,
   post: user.value.post,
   department: user.value.department,
   phone: user.value.phone,
@@ -62,8 +62,18 @@ async function submitForm(formElement) {
   }
 
   try {
-    await UserService.updateProfile(formData)
-    userStore.updateUser(formData)
+    await UserService.updateMe(formData)
+    const newUser = {
+      fullName: {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        patronymic: formData.patronymic,
+      },
+      post: formData.post,
+      department: formData.department,
+      phone: formData.phone,
+    }
+    userStore.updateUser(newUser)
     openNotification({
       title: 'Успех',
       message: 'Данные обновлены',
@@ -99,13 +109,13 @@ const rules = reactive({
 </script>
 
 <template>
-  <ElCard shadow="never" class="registration-page__card">
+  <ElCard shadow="never" class="profile-info">
     <template #header>
-      <VTitle level="2">Личные данные</VTitle>
+      <VTitle level="2" class="profile-info__title">Личные данные</VTitle>
     </template>
     <NForm
       ref="formRef"
-      class="form form--registration"
+      class="form form--profile-info"
       :model="formData"
       :rules="rules"
       status-icon
@@ -161,3 +171,13 @@ const rules = reactive({
     </NForm>
   </ElCard>
 </template>
+
+<style>
+.profile-info__title {
+  margin: 0;
+}
+
+.form--profile-info .form-actions {
+  margin: 0;
+}
+</style>

@@ -44,6 +44,10 @@
   padding-bottom: 28px;
 }
 
+.n-form-item__content--hide-hint {
+  padding-bottom: 0;
+}
+
 .n-form-item__content-inner {
   width: 100%;
 }

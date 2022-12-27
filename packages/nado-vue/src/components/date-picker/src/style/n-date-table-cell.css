@@ -102,6 +102,8 @@
 
   .n-date-table-cell--is-end-date .n-date-table-cell__text,
   .n-date-table-cell--is-start-date .n-date-table-cell__text {
+    color: var(--n-ref-palette-white);
+
     border-radius: 50px;
 
     background-color: var(--n-comp-date-picker-color-active);

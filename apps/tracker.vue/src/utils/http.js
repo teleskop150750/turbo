@@ -18,16 +18,16 @@ http.interceptors.request.use((config) => {
 })
 
 http.interceptors.response.use(
-  (response) => {
-    if (response.data && response.data.success && response.data.success !== true) {
-      return Promise.reject(response)
+  (response) => response,
+  (error) => {
+    if (!error.response) {
+      error.response = {
+        data: {},
+      }
     }
 
-    return response
-  },
-  (error) => {
-    if (!error.data) {
-      error.data = { message: 'Неизвестная ошибка' }
+    if (!error.response.data) {
+      error.response.data = {}
     }
 
     return Promise.reject(error)

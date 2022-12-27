@@ -1,4 +1,5 @@
 import {
+  NAvatar,
   NButton,
   NButtonGroup,
   NCheckbox,
@@ -31,6 +32,7 @@ import {
 } from './components/index.js'
 
 export const Components = [
+  NAvatar,
   NButton,
   NButtonGroup,
   NCheckbox,

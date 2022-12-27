@@ -18,9 +18,9 @@ import { extractDateFormat, extractTimeFormat } from '../../../date-time-picker/
 import { NInput } from '../../../input/index.js'
 import { TimePickPanel } from '../../../time-picker/index.js'
 import { panelDatePickProps } from '../props/panel-date-pick.js'
-import MonthTable from './NBasicMonthTable.vue'
-import YearTable from './NBasicYearTable.vue'
-import DateTable from './NDatePickerTable.vue'
+import NBasicMonthTable from './NBasicMonthTable.vue'
+import NBasicYearTable from './NBasicYearTable.vue'
+import NDatePickerTable from './NDatePickerTable.vue'
 
 const props = defineProps(panelDatePickProps)
 const contextEmit = defineEmits(['pick', 'set-picker-option', 'panel-change'])
@@ -752,7 +752,7 @@ contextEmit('set-picker-option', ['handleFocusPicker', handleFocusPicker])
           </span>
         </div>
         <div :class="dpNs.e('content')" @keydown="handleKeydownTable">
-          <DateTable
+          <NDatePickerTable
             v-if="currentView === 'date'"
             ref="currentViewRef"
             :selection-mode="selectionMode"
@@ -762,7 +762,7 @@ contextEmit('set-picker-option', ['handleFocusPicker', handleFocusPicker])
             :cell-class-name="cellClassName"
             @pick="handleDatePick"
           />
-          <YearTable
+          <NBasicYearTable
             v-if="currentView === 'year'"
             ref="currentViewRef"
             :date="innerDate"
@@ -770,7 +770,7 @@ contextEmit('set-picker-option', ['handleFocusPicker', handleFocusPicker])
             :parsed-value="parsedValue"
             @pick="handleYearPick"
           />
-          <MonthTable
+          <NBasicMonthTable
             v-if="currentView === 'month'"
             ref="currentViewRef"
             :date="innerDate"

@@ -16,11 +16,6 @@ export default defineConfig({
       include: ["src/**/*.ts", "src/**/*.vue", "src/**/*.d.ts"],
     }),
   ],
-  resolve: {
-    alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
-    },
-  },
   publicDir: false,
   build: {
     lib: {

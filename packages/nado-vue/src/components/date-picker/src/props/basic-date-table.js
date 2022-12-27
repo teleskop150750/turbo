@@ -7,7 +7,7 @@ export const basicDateTableProps = {
   },
   showWeekNumber: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   selectionMode: selectionModeWithDefault('date'),
 }

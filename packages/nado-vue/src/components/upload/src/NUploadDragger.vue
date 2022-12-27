@@ -45,7 +45,7 @@ const onDrop = (evt) => {
   }
 
   const filesFiltered = files.filter((file) => {
-    const { type, name } = file
+    const { type, parsedUserName: name } = file
     const extension = name.includes('.') ? `.${name.split('.').pop()}` : ''
     const baseType = type.replace(/\/.*$/, '')
 

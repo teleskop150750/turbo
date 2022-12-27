@@ -13,6 +13,7 @@
 
 @import url('../../components/input/src/style/n-input.css');
 @import url('../../components/input/src/style/n-textarea.css');
+@import url('../../components/avatar/src/style/n-avatar.css');
 
 @import url('../../components/radio/src/style/n-radio.css');
 @import url('../../components/scrollbar/src/style/n-scrollbar.css');

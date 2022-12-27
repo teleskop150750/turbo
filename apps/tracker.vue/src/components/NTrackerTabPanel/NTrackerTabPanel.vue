@@ -35,21 +35,26 @@ function setChar() {
     </div>
 
     <div class="n-tracker-tab-panel__body">
-      <NScrollbar>
-        <div v-if="isTable" class="n-tracker-tab-panel__body-item">
-          <slot name="table" />
-        </div>
-        <div v-else class="n-tracker-tab-panel__body-item">
-          <slot name="chart" />
-        </div>
-      </NScrollbar>
+      <!-- <NScrollbar> -->
+      <div v-if="isTable" class="n-tracker-tab-panel__body-item">
+        <slot name="table" />
+      </div>
+      <div v-else class="n-tracker-tab-panel__body-item">
+        <slot name="chart" />
+      </div>
+      <!-- </NScrollbar> -->
     </div>
   </div>
 </template>
 
 <style>
 .n-tracker-tab-panel {
+  display: grid;
+  grid-template-rows: 56px 1fr;
+
   height: 100%;
+
+  overflow: hidden;
 }
 
 .n-tracker-tab-panel__header {
@@ -91,14 +96,16 @@ function setChar() {
 }
 
 .n-tracker-tab-panel__body {
-  height: 100%;
+  overflow: hidden;
 
   /* height: 500px; */
 
-  overflow: auto;
+  /* overflow: auto; */
 }
 
 .n-tracker-tab-panel__body-item {
-  height: 500px;
+  height: 100%;
+
+  overflow: hidden;
 }
 </style>

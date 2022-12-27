@@ -77,7 +77,7 @@ export const ajaxUpload = (option) => {
     }
   }
 
-  formData.append(filename, file, file.name)
+  formData.append(filename, file, file.parsedUserName)
 
   xhr.addEventListener('error', () => {
     option.onError(getError(action, option, xhr))

@@ -18,4 +18,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: "latest",
   },
+  rules: {
+    "vue/prefer-import-from-vue": "off",
+  },
 };

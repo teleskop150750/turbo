@@ -1,3 +1,4 @@
+export * from './avatar/index.js'
 export * from './button/index.js'
 export * from './checkbox/index.js'
 export * from './date-picker/index.js'

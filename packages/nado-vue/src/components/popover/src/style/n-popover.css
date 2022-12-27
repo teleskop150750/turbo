@@ -18,8 +18,10 @@
     color: var(--n-sys-color-text-default);
     font-size: var(--n-comp-popover-container-font-size);
     line-height: 1.4;
-    text-align: justify;
-    word-break: break-all;
+
+    /* text-align: justify; */
+
+    /* word-break: break-all; */
 
     border: 1px solid var(--n-comp-popover-container-color-border);
     border-radius: var(--n-comp-popover-radius-border);

@@ -53,10 +53,10 @@ async function handleSubmit(formElement) {
       type: 'success',
     })
   } catch (error) {
-    if (error.data.message) {
+    if (error.response.data.title) {
       openNotification({
         title: 'Error',
-        message: error.data.message,
+        message: error.response.data.title,
         type: 'error',
       })
     }
@@ -75,11 +75,11 @@ const rules = reactive({
   <div class="verification-notification-page">
     <ElCard shadow="never" class="verification-notification-page__card">
       <template #header>
-        <VTitle>Сбросить пароль</VTitle>
+        <VTitle class="verification-notification-page__title">Сбросить пароль</VTitle>
       </template>
       <NForm
         ref="formRef"
-        class="form form--registration"
+        class="form form--verification-notification"
         :model="formData"
         :rules="rules"
         status-icon
@@ -95,12 +95,8 @@ const rules = reactive({
 
         <ElRow>
           <ElCol class="form-actions">
-            <div>
-              <NButton appearance="primary" @click="handleSubmit(formRef)"> Отправить письмо </NButton>
-            </div>
-            <div>
-              <NButton :to="{ name: 'login' }"> Войти </NButton>
-            </div>
+            <NButton appearance="primary" @click="handleSubmit(formRef)"> Отправить письмо </NButton>
+            <NButton :to="{ name: 'login' }"> Войти </NButton>
           </ElCol>
         </ElRow>
       </NForm>
@@ -120,5 +116,14 @@ const rules = reactive({
 
 .verification-notification-page__card {
   width: 600px;
+}
+
+.verification-notification-page__title {
+  margin: 0;
+}
+
+.form--verification-notification .form-actions {
+  display: flex;
+  justify-content: space-between;
 }
 </style>

@@ -33,10 +33,7 @@
     "lint:js": "eslint \"**/*.{js,jsx,cjs,json,vue}\"",
     "lint:js:fix": "eslint --fix \"**/*.{js,jsx,cjs,json,vue}\"",
     "lint:style": "stylelint \"**/*.{css,vue}\"",
-    "lint:style:fix": "stylelint --fix \"**/*.{css,vue}\"",
-    "commit": "cz",
-    "semantic-release": "semantic-release",
-    "prepare": "husky install"
+    "lint:style:fix": "stylelint --fix \"**/*.{css,vue}\""
   },
   "dependencies": {
     "@floating-ui/dom": "^1.0.4",
@@ -50,15 +47,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.2.0",
-    "@commitlint/config-conventional": "^17.2.0",
     "@rushstack/eslint-patch": "^1.2.0",
-    "@semantic-release/changelog": "^6.0.1",
-    "@semantic-release/commit-analyzer": "^9.0.2",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^8.0.6",
-    "@semantic-release/npm": "^9.0.1",
-    "@semantic-release/release-notes-generator": "^10.0.3",
     "@types/lodash-es": "*",
     "@types/node": "^18.11.9",
     "@typescript-eslint/eslint-plugin": "^5.42.0",
@@ -85,7 +74,6 @@
     "gulp-postcss": "^9.0.1",
     "gulp-prettier": "^4.0.0",
     "gulp-rename": "^2.0.0",
-    "husky": "^8.0.1",
     "jsonc-eslint-parser": "^2.1.0",
     "lint-staged": "^13.0.3",
     "postcss": "^8.4.18",
@@ -94,7 +82,6 @@
     "postcss-import": "^15.0.0",
     "postcss-nested": "^6.0.0",
     "prettier": "^2.7.1",
-    "semantic-release": "^19.0.5",
     "stylelint": "^14.14.1",
     "stylelint-color-format": "^1.1.0",
     "stylelint-config-html": "^1.1.0",

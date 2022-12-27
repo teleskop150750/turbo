@@ -1,14 +1,14 @@
 export const IMPORTANCE = {
   HIGH: {
-    label: 'Высокая важность',
+    label: 'Высокая',
     value: 'HIGH',
   },
   NORMAL: {
-    label: 'Обычная важность',
+    label: 'Обычная',
     value: 'NORMAL',
   },
   LOW: {
-    label: 'Низкая важность',
+    label: 'Низкая',
     value: 'LOW',
   },
 }

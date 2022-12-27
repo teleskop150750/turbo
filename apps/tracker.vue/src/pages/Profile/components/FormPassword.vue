@@ -120,28 +120,28 @@ function validatePasswordConfirm(rule, value, callback) {
 </script>
 
 <template>
-  <ElCard shadow="never">
+  <ElCard shadow="never" class="profile-password">
     <template #header>
-      <VTitle level="2">Изменить пароль</VTitle>
+      <VTitle level="2" class="profile-password__title">Изменить пароль</VTitle>
     </template>
     <NForm ref="formRef" :model="formData" :rules="rules" label-position="top">
       <ElRow :gutter="20">
-        <ElCol :span="12">
+        <ElCol :span="24">
           <NFormItem label="Текущий пароль" prop="currentPassword" :error="formError.currentPassword">
             <NInput v-model="formData.currentPassword" type="password" autocomplete="off" />
           </NFormItem>
         </ElCol>
       </ElRow>
       <ElRow :gutter="20">
-        <ElCol :span="12">
+        <ElCol :span="24">
           <NFormItem label="Пароль" prop="password" :error="formError.password">
             <NInput v-model="formData.password" type="password" autocomplete="off" />
           </NFormItem>
         </ElCol>
       </ElRow>
       <ElRow :gutter="20">
-        <ElCol :span="12">
-          <NFormItem label="Новый пароль" prop="passwordConfirm" :error="formError.passwordConfirm">
+        <ElCol :span="24">
+          <NFormItem label="Подтвердить пароль" prop="passwordConfirm" :error="formError.passwordConfirm">
             <NInput v-model="formData.passwordConfirm" type="password" autocomplete="off" />
           </NFormItem>
         </ElCol>
@@ -154,3 +154,9 @@ function validatePasswordConfirm(rule, value, callback) {
     </NForm>
   </ElCard>
 </template>
+
+<style>
+.profile-password__title {
+  margin: 0;
+}
+</style>

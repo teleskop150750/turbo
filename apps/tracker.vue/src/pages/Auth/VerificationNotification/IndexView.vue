@@ -1,12 +1,17 @@
 <script setup>
 import { NButton } from '@nado/nado-vue-ui'
-import { ElCard } from 'element-plus'
+import { ElCard, ElCol, ElRow } from 'element-plus'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 import VTitle from '../../../components/VTitle/VTitle.vue'
 import { useLoading } from '../../../composables/useLoading.js'
 import { useNotification } from '../../../composables/useNotification.js'
 import { UserService } from '../../../services/UserService.js'
+import { useUserStore } from '../../../store/user.js'
+
+const userStore = useUserStore()
+const router = useRouter()
 
 const isSending = ref(false)
 const { open: openLoading, close: closeLoading } = useLoading()
@@ -29,10 +34,10 @@ async function sendNewEmail() {
       type: 'success',
     })
   } catch (error) {
-    if (error.data.message) {
+    if (error.response.data.title) {
       openNotification({
         title: 'Error',
-        message: error.data.message,
+        message: error.response.data.title,
         type: 'error',
       })
     }
@@ -41,26 +46,27 @@ async function sendNewEmail() {
     closeLoading()
   }
 }
+
+function logout() {
+  router.push({ name: 'login' })
+  userStore.logout()
+}
 </script>
 
 <template>
   <div class="verification-notification-page">
     <ElCard shadow="never" class="verification-notification-page__card">
       <template #header>
-        <VTitle>Подтвердите почту</VTitle>
+        <VTitle class="verification-notification__title">Подтвердите почту</VTitle>
       </template>
       <p>
         Прежде чем продолжить, пожалуйста, проверьте свою электронную почту на наличие ссылки для подтверждения. Если вы
         не получили электронное письмо, нажмите здесь, чтобы запросить другое.
       </p>
       <ElRow>
-        <ElCol class="form-actions">
-          <div>
-            <NButton @click="sendNewEmail">Запросить другое</NButton>
-          </div>
-          <div>
-            <NButton :to="{ name: 'login' }"> Войти </NButton>
-          </div>
+        <ElCol class="verification-notification__actions">
+          <NButton @click="sendNewEmail">Запросить другое</NButton>
+          <NButton @click="logout"> Выйти </NButton>
         </ElCol>
       </ElRow>
     </ElCard>
@@ -79,5 +85,15 @@ async function sendNewEmail() {
 
 .verification-notification-page__card {
   width: 600px;
+}
+
+.verification-notification__title {
+  margin: 0;
+}
+
+.verification-notification__actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
 }
 </style>

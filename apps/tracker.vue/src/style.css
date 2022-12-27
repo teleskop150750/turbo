@@ -40,11 +40,6 @@
 
  */
 
-.n-radio-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
 
 /* main-gantt */
 .chart-filter {
@@ -65,28 +60,6 @@
   white-space: nowrap;
 
   overflow: auto !important;
-}
-
-/* tacker-option */
-.tacker-option {
-  display: grid;
-  grid-template-rows: min-content min-content;
-}
-
-.tacker-option__name {
-  font-weight: 600;
-  line-height: 1.5rem;
-  text-overflow: ellipsis;
-}
-
-.tacker-option__path {
-  display: flex;
-  gap: 0.25rem;
-  align-items: center;
-
-  height: 1.75rem;
-
-  text-overflow: ellipsis;
 }
 
 /* status-option */
@@ -216,4 +189,28 @@
 /* n-form-item */
 .n-form-item__content__inner {
   width: 100%;
+}
+
+
+/* ================== */
+.el-checkbox__inner:hover {
+  border-color: var(--n-sys-color-secondary);
+}
+
+.el-checkbox__input.is-checked .el-checkbox__inner {
+  border-color: var(--n-sys-color-secondary);
+
+  background-color: var(--n-sys-color-secondary);
+}
+
+.el-checkbox__input.is-checked + .el-checkbox__label {
+  color: var(--n-sys-color-secondary);
+}
+
+.el-table .descending .sort-caret.descending {
+  border-top-color: var(--n-sys-color-primary);
+}
+
+.el-table .ascending .sort-caret.ascending {
+    border-bottom-color: var(--n-sys-color-primary);
 }

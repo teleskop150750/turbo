@@ -16,7 +16,7 @@ export function getCurrentInstanceName(name = 'composables') {
   const vm = getCurrentInstance(name).type
 
   // @ts-ignore
-  return toKebabCase(vm?.aliasName || vm?.name)
+  return toKebabCase(vm?.aliasName || vm?.parsedUserName)
 }
 
 let _uid = 0

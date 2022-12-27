@@ -160,11 +160,9 @@ const rows = computed(() => {
 
   if (showWeekNumber) {
     for (let rowIndex = 0; rowIndex < 6; rowIndex++) {
-      if (!rows_[rowIndex][0]) {
-        rows_[rowIndex][0] = {
-          type: 'week',
-          text: startDate.value.add(rowIndex * 7 + 1, dateUnit).week(),
-        }
+      rows_[rowIndex][0] = {
+        type: 'week',
+        text: startDate.value.add(rowIndex * 7 + 1, dateUnit).week(),
       }
     }
   }
@@ -514,7 +512,7 @@ defineExpose({
   >
     <tbody ref="tbodyRef" :class="ns.e('body')">
       <tr :class="ns.e('row')">
-        <th v-if="showWeekNumber" :class="ns.e('title')" scope="col">{{ locale.el.datepicker.week }}</th>
+        <th v-if="showWeekNumber" :class="ns.e('title')" scope="col">№</th>
         <th
           v-for="(week, key) in WEEKS"
           :key="key"
@@ -541,7 +539,9 @@ defineExpose({
           @focus="handleFocus"
         >
           <NDatePickerCell
-            :class="[getCellClasses(cell, `${ns.namespace}-date-table-cell`, columnKey + 1)]"
+            :class="[
+              getCellClasses(cell, `${ns.namespace}-date-table-cell`, showWeekNumber ? columnKey : columnKey + 1),
+            ]"
             :cell="cell"
           />
         </td>

@@ -1,3 +1,3 @@
-import { NButton } from "./components/NButton";
+import { NTree } from "./components/tree";
 import type { Plugin } from "vue";
-export const Component = [NButton] as Plugin[];
+export const Component = [NTree] as Plugin[];

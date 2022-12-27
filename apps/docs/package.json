@@ -11,7 +11,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "@nado/ui": "workspace:^0.0.0",
+    "@nado/ui": "workspace:*",
     "vue": "^3.2.45"
   },
   "devDependencies": {

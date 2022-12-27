@@ -1,7 +1,16 @@
-import type { AppContext, Plugin } from "vue";
+export const mutable = <T extends readonly any[] | Record<string, unknown>>(
+  val: T
+) => val as Mutable<typeof val>;
+export type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
-export type SFCWithInstall<T> = T & Plugin;
+export type HTMLElementCustomized<T> = HTMLElement & T;
 
-export type SFCInstallWithContext<T> = SFCWithInstall<T> & {
-  _context: AppContext | null;
-};
+/**
+ * @deprecated stop to use null
+ * @see {@link https://github.com/sindresorhus/meta/discussions/7}
+ */
+export type Nullable<T> = T | null;
+export type Nillable<T> = T | undefined;
+
+export type Arrayable<T> = T | T[];
+export type Awaitable<T> = Promise<T> | T;

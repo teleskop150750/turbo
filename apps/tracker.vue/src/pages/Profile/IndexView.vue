@@ -1,4 +1,5 @@
 <script setup>
+import { NScrollbar } from '@nado/nado-vue-ui'
 import { ElCol, ElRow } from 'element-plus'
 import { inject } from 'vue'
 
@@ -12,23 +13,24 @@ layout.setTitle('Профиль')
 </script>
 
 <template>
-  <div class="profile-page">
-    <div class="profile-page__form">
-      <ElRow :gutter="20">
-        <ElCol :span="12">
-          <FormInfo />
-        </ElCol>
-        <ElCol :span="12">
-          <FormPassword />
-        </ElCol>
-      </ElRow>
+  <NScrollbar>
+    <div class="profile-page">
+      <div class="profile-page__form">
+        <ElRow :gutter="20">
+          <ElCol :span="12">
+            <FormInfo />
+          </ElCol>
+          <ElCol :span="12">
+            <FormPassword />
+          </ElCol>
+        </ElRow>
+      </div>
     </div>
-  </div>
+  </NScrollbar>
 </template>
 
 <style>
 .profile-page__form {
-  /* width: 600px; */
   padding: 2rem;
 }
 </style>
