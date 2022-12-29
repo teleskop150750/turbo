@@ -1,5 +1,5 @@
 <script setup>
-import { NButton, NIconSearch } from '@nado/nado-vue-ui'
+import { NButton, NIconSearch, NIconSettings } from '@nado/nado-vue-ui'
 import { inject } from 'vue'
 
 import { LAYOUT_DEFAULT_KEY } from '../../../../tokens/layout-default.js'
@@ -19,6 +19,7 @@ const layout = inject(LAYOUT_DEFAULT_KEY)
 
       <div class="n-header__left">
         <NButton :icon="NIconSearch" plain :to="{ name: 'search' }" />
+        <NButton :icon="NIconSettings" :to="{ name: 'menu-edit' }" />
         <NHeaderMenuAdd />
         <NHeaderMenuUser />
       </div>

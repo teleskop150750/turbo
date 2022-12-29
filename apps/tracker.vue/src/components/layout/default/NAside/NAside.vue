@@ -2,102 +2,47 @@
 import { NScrollbar } from '@nado/nado-vue-ui'
 import { ElTree } from 'element-plus'
 import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
 
 import { useLoading } from '../../../../composables/useLoading.js'
 import { useNotification } from '../../../../composables/useNotification.js'
 import { FolderService } from '../../../../services/FolderService.js'
+import { useMenuStore } from '../../../../store/menu.js'
 import NIconLogo from '../../../icons/NIconLogo.vue'
 import NMenuItem from './NMenuItem.vue'
 
+const menuStore = useMenuStore()
 const { open: openLoading, close: closeLoading } = useLoading()
 const { open: openNotification } = useNotification()
-
-const folders = ref([])
-
 const defaultProps = {
   children: 'children',
   label: 'name',
 }
 
-const menu = [
-  {
-    id: 'Unassembled',
-    name: 'Неразобранные',
-    type: 'UNASSEMBLED',
-    parentId: null,
-  },
-  {
-    id: 'Executor',
-    name: 'Я исполнитель',
-    type: 'EXECUTOR',
-    parentId: null,
-  },
-  {
-    id: 'Author',
-    name: 'Я автор',
-    type: 'AUTHOR',
-    parentId: null,
-  },
-  {
-    id: 'All',
-    name: 'Все',
-    type: 'ALL',
-    parentId: null,
-  },
-  {
-    id: 'USER',
-    name: 'Личное',
-    type: 'ROOT_USER',
-    parentId: null,
-  },
-  {
-    id: 'SHARED',
-    name: 'Доступные',
-    type: 'ROOT_SHARED',
-    parentId: null,
-  },
-]
+const menu = menuStore.getMenu()
+const route = useRoute()
+const defaultExpandedKeys = computed(() => {
+  if (route.name !== 'folder-tasks') {
+    return []
+  }
 
-const tree = computed(() => {
-  const items = [...folders.value, ...menu].filter((el) => ('type' in el ? el.type !== 'ROOT' : true))
-  const hashTable = {}
-  const result = []
-
-  items.forEach((item) => {
-    hashTable[item.id] = item
-    hashTable[item.id].children = []
-  })
-
-  Object.values(hashTable).forEach((hashItem) => {
-    const parentId = hashItem.parentId || null
-
-    if (!Object.hasOwn(hashTable, parentId)) {
-      // hashItem.parentId = null
-      result.push(hashItem)
-    } else {
-      hashTable[parentId].children.push(hashItem)
-    }
-  })
-
-  return result
+  return [route.params.id]
 })
-
-const menuItemsRef = ref([])
 
 async function getFolders() {
   const response = await FolderService.getFolders()
 
-  folders.value = response.data.data
+  menuStore.setUserFolders(response.data.data)
 }
 
 async function getData() {
   try {
     await Promise.all([getFolders()])
   } catch (error) {
-    if (error.data && error.data.title) {
+    if (error.response.data.title) {
       openNotification({
         title: 'Error',
-        message: error.data.title,
+        message: error.response.data.title,
         type: 'error',
       })
     }
@@ -111,12 +56,6 @@ async function getDataInit() {
 }
 
 getDataInit()
-
-function handlerBeforeEnter() {
-  menuItemsRef.value.forEach((el) => {
-    el.hideContextMenu()
-  })
-}
 </script>
 
 <template>
@@ -133,23 +72,14 @@ function handlerBeforeEnter() {
       <NScrollbar class="n-aside__body-scroll">
         <ElTree
           class="n-aside__tree"
-          :data="tree"
+          :data="menu"
           :props="defaultProps"
           node-key="id"
-          default-expand-all
+          :default-expanded-keys="defaultExpandedKeys"
           :expand-on-click-node="false"
         >
           <template #default="{ node, data }">
-            <NMenuItem
-              :ref="
-                (el) => {
-                  menuItemsRef.push(el)
-                }
-              "
-              :node="node"
-              :data="data"
-              @before-enter="handlerBeforeEnter"
-            />
+            <NMenuItem :node="node" :data="data" />
           </template>
         </ElTree>
       </NScrollbar>

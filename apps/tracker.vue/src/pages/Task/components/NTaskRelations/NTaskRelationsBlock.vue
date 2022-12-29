@@ -25,7 +25,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:ids'])
+const emit = defineEmits(['update:selected'])
 const selectedTask = ref(props.tasks.length > 0 ? props.tasks[0].value.id : null)
 
 function addTask() {
@@ -33,13 +33,17 @@ function addTask() {
     return
   }
 
-  emit('update:ids', [...new Set([...props.selected, selectedTask.value])])
+  if (props.selected.some((el) => el.value.id !== selectedTask.value.id)) {
+    return
+  }
+
+  emit('update:selected', [...props.selected, selectedTask.value])
 }
 
-function deleteTask(task) {
+function deleteTask(id) {
   emit(
-    'update:ids',
-    props.ids.filter((el) => el.value.id !== task.value.id),
+    'update:selected',
+    props.selected.filter((el) => el.id !== id),
   )
 }
 

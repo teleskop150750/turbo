@@ -4,7 +4,8 @@ import { ElCard, ElCol, ElRow } from 'element-plus'
 import { computed, inject, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import UserSelect from '../../../components/UserSelect/UserSelect.vue'
+import NNotFound from '../../../components/NNotFound/NNotFound.vue'
+import NUserSelect from '../../../components/NUserSelect/NUserSelect.vue'
 import VTitle from '../../../components/VTitle/VTitle.vue'
 import { useLoading } from '../../../composables/useLoading.js'
 import { useNotification } from '../../../composables/useNotification.js'
@@ -35,6 +36,7 @@ const formError = reactive({
 const search = ref('')
 const users = ref([])
 const folder = ref()
+const isFoundFolder = ref(true)
 
 const userOptions = computed(() => {
   if (!folder.value) {
@@ -112,8 +114,8 @@ async function submitForm(formEl) {
       type: 'success',
     })
   } catch (error) {
-    if (error.data.errors) {
-      Object.entries(error.data.errors).forEach(([key, errors]) => {
+    if (error.response.data.errors) {
+      Object.entries(error.response.data.errors).forEach(([key, errors]) => {
         if (Object.hasOwn(formError, key)) {
           const [firstError] = errors
 
@@ -122,10 +124,10 @@ async function submitForm(formEl) {
       })
     }
 
-    if (error.data.message) {
+    if (error.response.data.title) {
       openNotification({
         title: 'Error',
-        message: error.data.message,
+        message: error.response.data.title,
         type: 'error',
       })
     }
@@ -141,10 +143,10 @@ async function getData() {
   try {
     await Promise.all([getUsers(), getFolder()])
   } catch (error) {
-    if (error.request.data.title) {
+    if (error.response.data.title) {
       openNotification({
         title: 'Error',
-        message: error.request.data.title,
+        message: error.response.data.title,
         type: 'error',
       })
     }
@@ -158,15 +160,21 @@ async function getUsers() {
 }
 
 async function getFolder() {
-  const response = await FolderService.getFolder(route.params.id)
-  const responseFolder = response.data.data
+  try {
+    const response = await FolderService.getFolder(route.params.id)
+    const responseFolder = response.data.data
 
-  folder.value = responseFolder
-  const allSharedIds = responseFolder.sharedUsers.map((user) => user.id)
+    folder.value = responseFolder
+    const allSharedIds = responseFolder.sharedUsers.map((user) => user.id)
 
-  id.value = responseFolder.id
-  formData.name = responseFolder.name
-  formData.sharedUsers = allSharedIds
+    id.value = responseFolder.id
+    formData.name = responseFolder.name
+    formData.sharedUsers = allSharedIds
+  } catch (error) {
+    layout.setTitle('404')
+    isFoundFolder.value = false
+    throw error
+  }
 }
 
 async function getDataInit() {
@@ -179,8 +187,8 @@ getDataInit()
 </script>
 
 <template>
-  <NScrollbar>
-    <div class="update-folder-page">
+  <NScrollbar view-class="update-folder-page__scrollbar-view">
+    <div v-if="isFoundFolder" class="update-folder-page">
       <ElCard shadow="never" class="update-folder-page__card">
         <NForm
           ref="formRef"
@@ -206,7 +214,7 @@ getDataInit()
 
           <ElRow :gutter="20">
             <ElCol :span="24">
-              <UserSelect
+              <NUserSelect
                 v-model:search="search"
                 :users="userOptions"
                 @select="handleSelectUser"
@@ -224,6 +232,7 @@ getDataInit()
         </NForm>
       </ElCard>
     </div>
+    <NNotFound v-else />
   </NScrollbar>
 </template>
 
@@ -240,5 +249,9 @@ getDataInit()
   display: flex;
   gap: 1rem;
   justify-content: space-between;
+}
+
+.update-folder-page__scrollbar-view {
+  height: 100%;
 }
 </style>

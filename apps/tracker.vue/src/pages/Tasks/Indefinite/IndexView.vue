@@ -11,7 +11,7 @@ import { LAYOUT_DEFAULT_KEY } from '../../../tokens/layout-default.js'
 
 const layout = inject(LAYOUT_DEFAULT_KEY)
 
-layout.setTitle('Автор')
+layout.setTitle('Неопределенные')
 
 const { open: openLoading, close: closeLoading } = useLoading()
 const { open: openNotification } = useNotification()
@@ -34,7 +34,7 @@ async function getDataInit() {
 }
 
 async function getTasks() {
-  const response = await TaskService.getTasksAuthor()
+  const response = await TaskService.getTasksIndefinite()
 
   tasks.value = response.data.data
 }

@@ -49,6 +49,11 @@ async function verifyEmail() {
     closeLoading()
   }
 }
+
+function logout() {
+  router.push({ name: 'login' })
+  userStore.logout()
+}
 </script>
 
 <template>
@@ -63,7 +68,7 @@ async function verifyEmail() {
             <NButton @click="verifyEmail">Подтвердить</NButton>
           </div>
           <div>
-            <NButton :to="{ name: 'login' }"> Войти </NButton>
+            <NButton @click="logout"> Выйти </NButton>
           </div>
         </ElCol>
       </ElRow>

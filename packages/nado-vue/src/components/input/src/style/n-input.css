@@ -3,7 +3,7 @@
     .n-input {
       --n-comp-input-container-height: var(--n-sys-component-size);
       --n-comp-input-container-font-size: var(--n-sys-font-size-small);
-      --n-comp-input-container-color-text: var(--n-sys-text-color);
+      --n-comp-input-container-color-text: black;
       --n-comp-input-container-color-text-disabled: var(--n-sys-color-text-disabled);
       --n-comp-input-container-color-text-placeholder: var(--n-sys-color-text-placeholder);
       --n-comp-input-container-border: var(--n-sys-border);

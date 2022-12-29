@@ -101,14 +101,6 @@ async function submitForm(formElement) {
   }
 }
 
-function resetForm(formElement) {
-  if (!formElement) {
-    return
-  }
-
-  formElement.resetFields()
-}
-
 const rules = reactive({
   email: [{ required: true, message: 'Поле обязательно для заполнения', trigger: 'blur' }],
   firstName: [{ required: true, message: 'Поле обязательно для заполнения', trigger: 'blur' }],
@@ -223,7 +215,6 @@ function validatePasswordConfirm(rule, value, callback) {
         <ElRow>
           <ElCol class="form-actions">
             <NButton appearance="primary" @click="submitForm(formRef)"> Зарегистрироваться </NButton>
-            <NButton @click="resetForm(formRef)"> Сбросить </NButton>
             <NButton :to="{ name: 'login' }"> Войти </NButton>
           </ElCol>
         </ElRow>
@@ -253,5 +244,6 @@ function validatePasswordConfirm(rule, value, callback) {
 .form--registration .form-actions {
   display: flex;
   gap: 1rem;
+  justify-content: space-between;
 }
 </style>

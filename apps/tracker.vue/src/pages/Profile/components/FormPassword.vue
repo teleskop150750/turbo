@@ -61,8 +61,11 @@ async function submitForm(formElement) {
     })
     resetForm()
   } catch (error) {
-    if (error.data.errors) {
-      Object.entries(error.data.errors).forEach(([key, errors]) => {
+    if (error.response.data.errors) {
+      Object.entries(error.response.data.errors).forEach(([key, errors]) => {
+        console.log('key', key)
+        console.log(Object.hasOwn(formError, key))
+
         if (Object.hasOwn(formError, key)) {
           const [firstError] = errors
 
@@ -71,10 +74,10 @@ async function submitForm(formElement) {
       })
     }
 
-    if (error.data.message) {
+    if (error.response.data.title) {
       openNotification({
         title: 'Error',
-        message: error.data.message,
+        message: error.response.data.title,
         type: 'error',
       })
     }
@@ -100,10 +103,17 @@ const rules = reactive({
 
 function validatePassword(rule, value, callback) {
   if (value === '') {
-    callback(new Error('Поле обязательно для заполнения'))
-  } else if (formData.passwordConfirm !== '') {
+    return callback(new Error('Поле обязательно для заполнения'))
+  }
+
+  if (value.length < 8) {
+    return callback(new Error('Минимальная длина пароля 8'))
+  }
+
+  if (formData.passwordConfirm !== '') {
     formRef.value.validateField('passwordConfirm', () => null)
-    callback()
+
+    return callback()
   }
 }
 
@@ -128,21 +138,21 @@ function validatePasswordConfirm(rule, value, callback) {
       <ElRow :gutter="20">
         <ElCol :span="24">
           <NFormItem label="Текущий пароль" prop="currentPassword" :error="formError.currentPassword">
-            <NInput v-model="formData.currentPassword" type="password" autocomplete="off" />
+            <NInput v-model="formData.currentPassword" type="password" autocomplete="off" show-password />
           </NFormItem>
         </ElCol>
       </ElRow>
       <ElRow :gutter="20">
         <ElCol :span="24">
           <NFormItem label="Пароль" prop="password" :error="formError.password">
-            <NInput v-model="formData.password" type="password" autocomplete="off" />
+            <NInput v-model="formData.password" type="password" autocomplete="off" show-password />
           </NFormItem>
         </ElCol>
       </ElRow>
       <ElRow :gutter="20">
         <ElCol :span="24">
           <NFormItem label="Подтвердить пароль" prop="passwordConfirm" :error="formError.passwordConfirm">
-            <NInput v-model="formData.passwordConfirm" type="password" autocomplete="off" />
+            <NInput v-model="formData.passwordConfirm" type="password" autocomplete="off" show-password />
           </NFormItem>
         </ElCol>
       </ElRow>

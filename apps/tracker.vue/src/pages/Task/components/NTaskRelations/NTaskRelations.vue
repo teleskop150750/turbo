@@ -1,5 +1,5 @@
 <script setup>
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 
 import NTaskRelationsBlock from './NTaskRelationsBlock.vue'
 
@@ -67,8 +67,6 @@ const tasksAffects = computed(() => {
     .filter((el) => ids.has(el.id))
 })
 
-const tasksMap = computed(() => Object.fromEntries(props.tasks.map((item) => [item.id, item])))
-
 function updateDepends(val) {
   emit('update:depends', val)
 }
@@ -76,77 +74,17 @@ function updateDepends(val) {
 function updateAffects(val) {
   emit('update:affects', val)
 }
-
-function getMinDate(depends) {
-  if (depends === undefined || depends === null) {
-    return undefined
-  }
-
-  if (depends.length === 0) {
-    return undefined
-  }
-
-  const dates = depends.map((id) => new Date(tasksMap.value[id].endDate).getTime())
-
-  if (dates.length === 0) {
-    return undefined
-  }
-
-  const localeDate = new Date(Math.max(...dates))
-
-  return new Date(localeDate.getTime())
-}
-
-function getMaxDate(affects) {
-  if (affects === undefined || affects === null) {
-    return undefined
-  }
-
-  if (affects.length === 0) {
-    return undefined
-  }
-
-  const dates = affects.map((id) => new Date(tasksMap.value[id].startDate).getTime())
-
-  if (dates.length === 0) {
-    return undefined
-  }
-
-  const localeDate = new Date(Math.min(...dates))
-
-  return new Date(localeDate.getTime())
-}
-
-watch(
-  () => props.depends,
-  (val) => {
-    emit('update:maxDate', getMaxDate(val))
-  },
-  {
-    immediate: true,
-  },
-)
-
-watch(
-  () => props.affects,
-  (val) => {
-    emit('update:minDate', getMinDate(val))
-  },
-  {
-    immediate: true,
-  },
-)
 </script>
 
 <template>
   <div class="n-task-relations">
-    <NTaskRelationsBlock :selected="tasksDepends" :tasks="tasksOptions" @update:ids="updateDepends">
+    <NTaskRelationsBlock :selected="tasksDepends" :tasks="tasksOptions" @update:selected="updateDepends">
       <template #title> Эта задача блокирует: </template>
       <template #description>
         Эта задача блокирует выбранные ниже. Их нельзя начать, пока не завершится эта задача
       </template>
     </NTaskRelationsBlock>
-    <NTaskRelationsBlock :selected="tasksAffects" :tasks="tasksOptions" @update:ids="updateAffects">
+    <NTaskRelationsBlock :selected="tasksAffects" :tasks="tasksOptions" @update:selected="updateAffects">
       <template #title> Эта задача зависит от: </template>
       <template #description>
         Эта задача зависит от выбранных ниже. Пока они не завершатся, эту задачу нельзя начать

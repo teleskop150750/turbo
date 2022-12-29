@@ -53,7 +53,10 @@ const path = computed(() => props.folder.value.path)
 <style>
 .n-folder-option {
   display: grid;
-  grid-template-rows: min-content min-content;
+  grid-template-rows: 1fr 1fr;
+  align-items: center;
+
+  height: 100%;
 }
 
 .n-folder-option__name {

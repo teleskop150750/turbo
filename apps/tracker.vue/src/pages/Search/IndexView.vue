@@ -2,6 +2,7 @@
 import { NScrollbar } from '@nado/nado-vue-ui'
 import { inject, ref } from 'vue'
 
+import { FOLDER_TYPE } from '../../components/layout/default/NAside/constants.js'
 import NFoldersTable from '../../components/NFoldersTable/NFoldersTable.vue'
 import NTasksTable from '../../components/NTasksTable/NTasksTable.vue'
 import VTitle from '../../components/VTitle/VTitle.vue'
@@ -24,10 +25,10 @@ async function getDataInit() {
   try {
     await Promise.all([getFolders(), getTasks()])
   } catch (error) {
-    if (error.data && error.data.title) {
+    if (error.response.data.title) {
       openNotification({
         title: 'Error',
-        message: error.data.title,
+        message: error.response.data.title,
         type: 'error',
       })
     }
@@ -37,7 +38,7 @@ async function getDataInit() {
 
 async function getFolders() {
   const response = await FolderService.getFolders()
-  const responseFolders = response.data.data
+  const responseFolders = response.data.data.filter((el) => el.type !== FOLDER_TYPE.ROOT_USER)
 
   folders.value = responseFolders
 }
@@ -49,6 +50,40 @@ async function getTasks() {
 }
 
 getDataInit()
+
+async function deleteFolder(id) {
+  openLoading()
+  try {
+    await FolderService.delete(id)
+    await Promise.all([getFolders(), getTasks()])
+  } catch (error) {
+    if (error.response.data.title) {
+      openNotification({
+        title: 'Error',
+        message: error.response.data.title,
+        type: 'error',
+      })
+    }
+  }
+  closeLoading()
+}
+
+async function handleDelete(id) {
+  openLoading()
+  try {
+    await TaskService.delete(id)
+    await Promise.all([getFolders(), getTasks()])
+  } catch (error) {
+    if (error.response.data.title) {
+      openNotification({
+        title: 'Error',
+        message: error.response.data.title,
+        type: 'error',
+      })
+    }
+  }
+  closeLoading()
+}
 </script>
 
 <template>
@@ -58,7 +93,7 @@ getDataInit()
         <VTitle class="page-search-box__title" level="2">Папки</VTitle>
 
         <div class="page-search-box__table">
-          <NFoldersTable :data="folders" />
+          <NFoldersTable :data="folders" @delete="deleteFolder" />
         </div>
       </div>
 
@@ -66,7 +101,7 @@ getDataInit()
         <VTitle class="page-search-box__title" level="2">Задачи</VTitle>
 
         <div class="page-search-box__table">
-          <NTasksTable :data="tasks" />
+          <NTasksTable :data="tasks" @delete="handleDelete" />
         </div>
       </div>
     </div>
@@ -75,9 +110,22 @@ getDataInit()
 
 <style>
 .page-search {
-  padding-top: 2rem;
-  padding-right: 1rem;
-  padding-bottom: 3rem;
+  display: grid;
+  grid-template-columns: 100%;
+
+  width: 100%;
+  padding: 2rem 1rem 3rem 0;
+
+  overflow: hidden;
+}
+
+.page-search-box {
+  display: grid;
+  grid-template-columns: 100%;
+
+  width: 100%;
+
+  overflow: hidden;
 }
 
 .page-search-box + .page-search-box {

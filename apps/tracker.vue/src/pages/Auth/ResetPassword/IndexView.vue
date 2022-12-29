@@ -88,10 +88,17 @@ const rules = reactive({
 
 function validatePassword(rule, value, callback) {
   if (value === '') {
-    callback(new Error('Поле обязательно для заполнения'))
-  } else if (formData.passwordConfirm !== '') {
+    return callback(new Error('Поле обязательно для заполнения'))
+  }
+
+  if (value.length < 8) {
+    return callback(new Error('Минимальная длина пароля 8'))
+  }
+
+  if (formData.passwordConfirm !== '') {
     formRef.value.validateField('passwordConfirm', () => null)
-    callback()
+
+    return callback()
   }
 }
 

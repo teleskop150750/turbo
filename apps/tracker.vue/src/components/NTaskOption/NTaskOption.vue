@@ -15,33 +15,33 @@ const path = computed(() => props.task.value.folders.map((folder) => folder.name
 <template>
   <NTooltip placement="left">
     <template #content>
-      <div class="n-folder-option-path-preview">
+      <div class="n-task-option-path-preview">
         <span
           v-for="(pathItem, index) in path"
           :key="index"
-          class="n-folder-option-path-preview__item"
+          class="n-task-option-path-preview__item"
           disable-transitions
           type="warning"
           size="small"
         >
-          <span class="n-folder-option-path-preview__item-name">
+          <span class="n-task-option-path-preview__item-name">
             {{ pathItem }}
           </span>
         </span>
       </div>
     </template>
-    <div class="n-folder-option">
-      <span class="n-folder-option__name">{{ task.label }}</span>
-      <div class="n-folder-option__path">
+    <div class="n-task-option">
+      <span class="n-task-option__name">{{ task.label }}</span>
+      <div class="n-task-option__path">
         <span
           v-for="(pathItem, index) in path"
           :key="index"
-          class="n-folder-option__path-item"
+          class="n-task-option__path-item"
           disable-transitions
           type="warning"
           size="small"
         >
-          <span class="n-folder-option__path-item-name">
+          <span class="n-task-option__path-item-name">
             {{ pathItem }}
           </span>
         </span>
@@ -51,12 +51,15 @@ const path = computed(() => props.task.value.folders.map((folder) => folder.name
 </template>
 
 <style>
-.n-folder-option {
+.n-task-option {
   display: grid;
-  grid-template-rows: min-content min-content;
+  grid-template-rows: 1fr 1fr;
+  align-items: center;
+
+  height: 100%;
 }
 
-.n-folder-option__name {
+.n-task-option__name {
   font-weight: 600;
   line-height: 1.5rem;
   text-overflow: ellipsis;
@@ -64,7 +67,7 @@ const path = computed(() => props.task.value.folders.map((folder) => folder.name
   overflow: hidden;
 }
 
-.n-folder-option__path {
+.n-task-option__path {
   height: 20px;
   min-width: 0;
   margin: 0;
@@ -77,12 +80,12 @@ const path = computed(() => props.task.value.folders.map((folder) => folder.name
   overflow: hidden;
 }
 
-.n-select-v2-dropdown__item--is-selected .n-folder-option__path {
+.n-select-v2-dropdown__item--is-selected .n-task-option__path {
   color: var(--n-sys-color-secondary);
   font-weight: var(--n-sys-font-weight-regular);
 }
 
-.n-folder-option__path-item {
+.n-task-option__path-item {
   display: inline-flex;
   gap: 2px;
   align-items: center;
@@ -92,7 +95,7 @@ const path = computed(() => props.task.value.folders.map((folder) => folder.name
   white-space: nowrap;
 }
 
-.n-folder-option__path-item:not(.n-folder-option__path-item:last-child)::after {
+.n-task-option__path-item:not(.n-task-option__path-item:last-child)::after {
   content: '';
 
   display: flex;
@@ -103,7 +106,7 @@ const path = computed(() => props.task.value.folders.map((folder) => folder.name
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xml:space='preserve' viewBox='0 0 500 500'%3E%3Cpath d='M377 219c8 9 12 20 12 31H248L120 122a31 31 0 0 1 0-45l40-40c9-9 25-9 35 0l182 182z' style='fill:%2317a2ff'/%3E%3Cpath d='M389 250c0 11-4 22-12 31L195 463c-10 9-26 9-35 0l-40-40a31 31 0 0 1 0-45l128-128h141z' style='fill:%23008eed'/%3E%3C/svg%3E");
 }
 
-.n-folder-option-path-preview {
+.n-task-option-path-preview {
   display: flex;
   flex-wrap: wrap;
   gap: 3px;
@@ -112,7 +115,7 @@ const path = computed(() => props.task.value.folders.map((folder) => folder.name
   max-width: 300px;
 }
 
-.n-folder-option-path-preview__item {
+.n-task-option-path-preview__item {
   display: inline-flex;
   gap: 2px;
   align-items: center;
@@ -122,7 +125,7 @@ const path = computed(() => props.task.value.folders.map((folder) => folder.name
   white-space: nowrap;
 }
 
-.n-folder-option-path-preview__item:not(.n-folder-option-path-preview__item:last-child)::after {
+.n-task-option-path-preview__item:not(.n-task-option-path-preview__item:last-child)::after {
   content: '';
 
   display: flex;

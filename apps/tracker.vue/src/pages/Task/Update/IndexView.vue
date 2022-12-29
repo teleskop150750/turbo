@@ -1,4 +1,5 @@
 <script setup>
+import { dayjs } from '@nado/nado-gantt-chart'
 import {
   NButton,
   NDatePicker,
@@ -9,25 +10,25 @@ import {
   NScrollbar,
   NSelect,
   NSelectV2,
-  NUpload,
 } from '@nado/nado-vue-ui'
 import { ElCard, ElCol, ElRow } from 'element-plus'
-import { computed, inject, reactive, ref } from 'vue'
+import { computed, inject, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import NEditor from '../../../components/NEditor/NEditor.vue'
 import NFolderOption from '../../../components/NFolderOption/NFolderOption.vue'
-import UserSelect from '../../../components/UserSelect/UserSelect.vue'
-import VEditor from '../../../components/VEditor/VEditor.vue'
+import NNotFound from '../../../components/NNotFound/NNotFound.vue'
+import NUserSelect from '../../../components/NUserSelect/NUserSelect.vue'
 import VTitle from '../../../components/VTitle/VTitle.vue'
 import { useLoading } from '../../../composables/useLoading.js'
 import { useNotification } from '../../../composables/useNotification.js'
 import { FolderService } from '../../../services/FolderService.js'
 import { TaskService } from '../../../services/TaskService.js'
 import { UserService } from '../../../services/UserService.js'
-import { useUserStore } from '../../../store/user.js'
 import { LAYOUT_DEFAULT_KEY } from '../../../tokens/layout-default.js'
 import { IMPORTANCE, STATUSES } from '../../../tracker/task.js'
 import NTaskRelations from '../components/NTaskRelations/NTaskRelations.vue'
+import { useRelationsDateRange } from '../components/NTaskRelations/useRelationsDateRange.js'
 
 const layout = inject(LAYOUT_DEFAULT_KEY)
 
@@ -36,8 +37,6 @@ const { open: openLoading, close: closeLoading } = useLoading()
 const { open: openNotification } = useNotification()
 const route = useRoute()
 const router = useRouter()
-const userStore = useUserStore()
-const authUser = userStore.getUser()
 const formRef = ref()
 const isSending = ref(false)
 
@@ -63,19 +62,16 @@ const formError = reactive({
   dateRange: '',
   description: '',
 })
-const fileList = ref([])
 
 const search = ref('')
+const task = ref()
 const users = ref([])
 const folders = ref([])
 const tasks = ref([])
 const wasStarted = ref(false)
-const rights = ref({})
+const isFoundFolder = ref(true)
 
-const dateRange = reactive({
-  minDate: undefined,
-  maxDate: undefined,
-})
+const { minDate } = useRelationsDateRange(tasks, formData)
 
 const folderOptions = computed(() =>
   folders.value.map((folder) => ({
@@ -89,20 +85,33 @@ const userOptions = computed(() =>
   users.value.map((user) => {
     let selected = false
 
-    if (formData.executors.includes(user.id) || user.id === authUser.value.id) {
+    if (formData.executors.includes(user.id)) {
       selected = true
     }
-
-    const disabled = user.id === authUser.value.id
 
     return {
       value: user,
       label: `${user.fullName.firstName[0]}. ${user.fullName.lastName}`,
-      disabled,
+      disabled: false,
       selected,
     }
   }),
 )
+
+const canStart = computed(() => {
+  if (formData.affects.length === 0) {
+    return true
+  }
+
+  const tasksIds = new Set(formData.affects)
+  const _tasks = tasks.value.filter((el) => tasksIds.has(el.id))
+
+  if (_tasks.some((el) => el.type !== STATUSES.DONE.value)) {
+    return false
+  }
+
+  return true
+})
 
 function handleSelectUser(_users) {
   _users.forEach((user) => {
@@ -124,10 +133,12 @@ const statusOptions = computed(() => {
   return statuses.map((status) => {
     status.disabled = false
 
-    // @ts-ignore
-    if (status.value === STATUSES.IN_WORK.value && rights.value.CAN_BEGIN_TASK !== undefined) {
-      // @ts-ignore
-      status.disabled = !rights.value.CAN_BEGIN_TASK
+    if (status.value === STATUSES.IN_WORK.value && canStart.value === false) {
+      status.disabled = true
+    }
+
+    if (status.value === STATUSES.DONE.value && canStart.value === false) {
+      status.disabled = true
     }
 
     return status
@@ -179,8 +190,8 @@ async function submitForm() {
       type: 'success',
     })
   } catch (error) {
-    if (error.data.errors) {
-      Object.entries(error.data.errors).forEach(([key, errors]) => {
+    if (error.response.data.errors) {
+      Object.entries(error.response.data.errors).forEach(([key, errors]) => {
         if (Object.hasOwn(formError, key)) {
           const [firstError] = errors
 
@@ -189,10 +200,10 @@ async function submitForm() {
       })
     }
 
-    if (error.data.message) {
+    if (error.response.data.title) {
       openNotification({
         title: 'Error',
-        message: error.data.message,
+        message: error.response.data.title,
         type: 'error',
       })
     }
@@ -204,30 +215,41 @@ async function submitForm() {
 
 const rules = reactive({
   name: [{ required: true, message: 'Поле обязательно для заполнения', trigger: 'blur' }],
-  folders: [{ required: true, message: 'Поле обязательно для заполнения', trigger: 'change' }],
   importance: [{ required: true, message: 'Поле обязательно для заполнения', trigger: 'blur' }],
   dateRange: [{ required: true, validator: validateDateRange, trigger: 'blur' }],
-  status: [{ required: true, message: 'Поле обязательно для заполнения', trigger: 'change' }],
+  status: [{ required: true, validator: validateStatus, trigger: 'change' }],
 })
+
+function validateStatus(_, value, callback) {
+  if (!value) {
+    callback(new Error('Поле обязательно для заполнения'))
+  }
+
+  if (value === STATUSES.IN_WORK.value && canStart.value === false) {
+    callback(new Error('Невалидное значение'))
+  }
+
+  if (value === STATUSES.DONE.value && canStart.value === false) {
+    callback(new Error('Невалидное значение'))
+  }
+
+  callback()
+}
 
 function validateDateRange(_, value, callback) {
   if (value.length < 2) {
     callback(new Error('Дата выполнения не указана'))
   }
 
-  const startDate = new Date(value[0])
-  const endDate = new Date(value[1])
+  const startDate = dayjs(value[0]).utcOffset(0, true)
+  const endDate = dayjs(value[1]).utcOffset(0, true)
 
   if (!(startDate < endDate)) {
     callback(new Error('Дата начала должна быть раньше'))
   }
 
-  if (dateRange.minDate && startDate.getTime() < dateRange.minDate.getTime()) {
+  if (minDate.value && startDate < minDate.value) {
     callback(new Error('Невалидная дата начала'))
-  }
-
-  if (dateRange.maxDate && endDate.getTime() > dateRange.maxDate.getTime()) {
-    callback(new Error('Невалидная дата конца'))
   }
 
   callback()
@@ -235,12 +257,13 @@ function validateDateRange(_, value, callback) {
 
 async function getData() {
   try {
-    await Promise.all([getTask(), getFolders(), getUsers(), getTasks()])
+    await getTask()
+    await Promise.all([getFolders(), getUsers(), getTasks()])
   } catch (error) {
-    if (error.data && error.data.title) {
+    if (error.response.data.title) {
       openNotification({
         title: 'Error',
-        message: error.data.title,
+        message: error.response.data.title,
         type: 'error',
       })
     }
@@ -258,39 +281,35 @@ async function getFolders() {
   const responseFolders = response.data.data
 
   folders.value = responseFolders
-
-  const rootFolder = response.data.data.find((folder) => folder.type === 'ROOT') || null
-
-  if (rootFolder) {
-    formData.folders.push(rootFolder.id)
-  }
 }
 
 async function getTask() {
-  const response = await TaskService.show(route.params.id)
-  const task = response.data.data
+  try {
+    const response = await TaskService.show(route.params.id)
+    const responseTask = response.data.data
 
-  // fileList.value = responseTask.files.map((item) => ({
-  //   id: item.id,
-  //   name: item.originName,
-  // }))
-
-  formData.id = task.id
-  formData.name = task.name
-  formData.importance = task.importance
-  formData.status = task.status
-  formData.dateRange = [task.startDate, task.endDate]
-  formData.description = task.description
-  formData.executors = task.executors.map((user) => user.id)
-  formData.folders = task.folders.map((folder) => folder.id)
-  formData.depends = task.inverseTaskRelationships.map((rel) => rel.left.id)
-  formData.affects = task.taskRelationships.map((rel) => rel.right.id)
+    task.value = responseTask
+    formData.id = responseTask.id
+    formData.name = responseTask.name
+    formData.importance = responseTask.importance
+    formData.status = responseTask.status
+    formData.dateRange = [responseTask.startDate, responseTask.endDate]
+    formData.description = responseTask.description
+    formData.executors = responseTask.executors.map((user) => user.id)
+    formData.folders = responseTask.folders.map((folder) => folder.id)
+    formData.depends = responseTask.taskRelationships.map((rel) => rel.right.id)
+    formData.affects = responseTask.inverseTaskRelationships.map((rel) => rel.left.id)
+  } catch (error) {
+    layout.setTitle('404')
+    isFoundFolder.value = false
+    throw error
+  }
 }
 
 async function getTasks() {
   const response = await TaskService.getTasks()
 
-  tasks.value = response.data.data
+  tasks.value = response.data.data.filter((el) => el.id !== task.value.id)
 }
 
 async function getDataInit() {
@@ -299,53 +318,13 @@ async function getDataInit() {
   closeLoading()
 }
 
-const handleRemove = (file, uploadFiles) => {
-  console.log(file, uploadFiles)
-}
-
-async function handlePreview(uploadFile) {
-  try {
-    const response = await TaskService.downloadFile(uploadFile.id)
-    const fileUrl = window.URL.createObjectURL(new Blob([response.data]))
-    const docUrl = document.createElement('a')
-
-    docUrl.href = fileUrl
-    docUrl.setAttribute('download', uploadFile.name)
-    document.body.append(docUrl)
-    docUrl.click()
-    docUrl.remove()
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-async function beforeRemove(uploadFile) {
-  try {
-    const id = uploadFile.response ? uploadFile.response.data.id : uploadFile.id
-
-    await TaskService.removeFile(id)
-
-    return true
-  } catch {
-    return false
-  }
-}
-
-const uploadUrl = computed(() => `${import.meta.env.VITE_APP_API_URL}/api/v1/tasks/${formData.id}/add-file`)
-
 getDataInit()
 
 const disabledDate = (time) => {
-  if (dateRange.minDate && dateRange.maxDate) {
-    return time.getTime() < dateRange.minDate.getTime() || time.getTime() > dateRange.maxDate.getTime()
-  }
+  const currentDate = dayjs(time).utcOffset(0, true)
 
-  if (dateRange.minDate) {
-    return time.getTime() < dateRange.minDate.getTime()
-  }
-
-  if (dateRange.maxDate) {
-    return time.getTime() > dateRange.maxDate.getTime()
+  if (minDate.value) {
+    return currentDate < minDate.value
   }
 
   return false
@@ -353,195 +332,210 @@ const disabledDate = (time) => {
 
 function handleDepends(val) {
   formData.depends = val
-  // updateRelations()
 }
 
 function handleAffects(val) {
   formData.affects = val
-  // updateRelations()
 }
 
-async function getRelations() {
-  const response = await TaskService.show(route.params.id)
-  const task = response.data.data
+watch(
+  () => formData.status,
+  (val) => {
+    if (!task.value) {
+      return
+    }
 
-  formData.status = task.status
-  formData.depends = task.inverseTaskRelationships.map((rel) => rel.left.id)
-  formData.affects = task.taskRelationships.map((rel) => rel.right.id)
-}
+    if (task.value.status === STATUSES.DONE.value) {
+      return
+    }
+
+    if (formData.dateRange.length < 2) {
+      return
+    }
+
+    if (val === STATUSES.DONE.value) {
+      const [dataStart] = formData.dateRange
+
+      const dateEnd = dayjs()
+        .utcOffset(0, true)
+        .startOf('day')
+        .add(1, 'day')
+        .utc()
+        .format('YYYY-MM-DDTHH:mm:ss[+00:00]')
+
+      formData.dateRange = [dataStart, dateEnd]
+    }
+  },
+)
 </script>
 
 <template>
-  <NScrollbar>
+  <NScrollbar view-class="update-task-page__scrollbar-view">
     <div class="update-task-page">
-      <ElCard shadow="never" class="update-task-page__card">
-        <NForm
-          ref="formRef"
-          class="form form--update-task"
-          :model="formData"
-          :rules="rules"
-          status-icon
-          label-position="top"
-        >
-          <ElRow :gutter="20">
-            <ElCol :span="10">
-              <ElRow :gutter="20">
-                <ElCol :span="24">
-                  <NFormItem label="Название задачи" prop="name" :error="formError.name">
-                    <NInput v-model="formData.name" autocomplete="off" />
-                  </NFormItem>
-                </ElCol>
-              </ElRow>
-              <ElRow :gutter="20">
-                <ElCol :span="24">
-                  <NFormItem label="Папки" prop="folders" :error="formError.folders">
-                    <NSelectV2
-                      v-model="formData.folders"
-                      :options="folderOptions"
-                      value-key="id"
-                      multiple
-                      filterable
-                      :item-height="52"
-                      style="width: 100%"
-                      placeholder="Выберите"
-                    >
-                      <template #default="{ item }">
-                        <NFolderOption :folder="item" />
-                      </template>
-                    </NSelectV2>
-                  </NFormItem>
-                </ElCol>
-              </ElRow>
-
-              <ElRow :gutter="20">
-                <ElCol :span="24">
-                  <VTitle class="form__subtitle" level="3">Участники</VTitle>
-                </ElCol>
-              </ElRow>
-
-              <ElRow :gutter="20">
-                <ElCol :span="24">
-                  <UserSelect
-                    v-model:search="search"
-                    :users="userOptions"
-                    @select="handleSelectUser"
-                    @unselect="handleUnselectUser"
-                  />
-                </ElCol>
-              </ElRow>
-
-              <ElRow :gutter="20">
-                <ElCol :span="12">
-                  <NFormItem label="Важность" prop="importance" :error="formError.importance">
-                    <NSelect v-model="formData.importance" style="width: 100%" placeholder="Выберите">
-                      <NOption
-                        v-for="item in Object.values(IMPORTANCE)"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                      />
-                    </NSelect>
-                  </NFormItem>
-                </ElCol>
-
-                <ElCol :span="12">
-                  <NFormItem label="Статус" prop="status" :error="formError.status">
-                    <NSelect v-model="formData.status" style="width: 100%" placeholder="Выберите">
-                      <NOption
-                        v-for="item in statusOptions"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value"
-                        :disabled="item.disabled"
+      <div class="update-task-page__inner">
+        <ElCard v-if="isFoundFolder" shadow="never" class="update-task-page__card">
+          <NForm
+            ref="formRef"
+            class="form form--update-task"
+            :model="formData"
+            :rules="rules"
+            status-icon
+            label-position="top"
+          >
+            <ElRow :gutter="20">
+              <ElCol :span="10">
+                <ElRow :gutter="20">
+                  <ElCol :span="24">
+                    <NFormItem label="Название задачи" prop="name" :error="formError.name">
+                      <NInput v-model="formData.name" autocomplete="off" />
+                    </NFormItem>
+                  </ElCol>
+                </ElRow>
+                <ElRow :gutter="20">
+                  <ElCol :span="24">
+                    <NFormItem label="Папки" prop="folders" :error="formError.folders">
+                      <NSelectV2
+                        v-model="formData.folders"
+                        :options="folderOptions"
+                        value-key="id"
+                        multiple
+                        filterable
+                        :item-height="52"
+                        style="width: 100%"
+                        placeholder="Выберите"
                       >
-                        <div class="status-option">
-                          <span class="status-option__color" :style="{ '--status-color': item.color }" />
-                          <span class="status-option__label">
-                            {{ item.label }}
-                          </span>
-                        </div>
-                      </NOption>
-                    </NSelect>
-                  </NFormItem>
-                </ElCol>
-              </ElRow>
+                        <template #default="{ item }">
+                          <NFolderOption :folder="item" />
+                        </template>
+                      </NSelectV2>
+                    </NFormItem>
+                  </ElCol>
+                </ElRow>
 
-              <ElRow :gutter="20">
-                <ElCol :span="24">
-                  <VTitle class="form__subtitle" level="3">Связанные задачи</VTitle>
-                </ElCol>
-              </ElRow>
+                <ElRow :gutter="20">
+                  <ElCol :span="24">
+                    <VTitle class="form__subtitle" level="3">Участники</VTitle>
+                  </ElCol>
+                </ElRow>
 
-              <ElRow :gutter="20">
-                <ElCol :span="24">
-                  <NTaskRelations
-                    v-model:minDate="dateRange.minDate"
-                    v-model:maxDate="dateRange.maxDate"
-                    :depends="formData.depends"
-                    :affects="formData.affects"
-                    class="form__relations"
-                    :tasks="tasks"
-                    @update:depends="handleDepends"
-                    @update:affects="handleAffects"
-                  />
-                </ElCol>
-              </ElRow>
-
-              <ElRow :gutter="20">
-                <ElCol :span="24">
-                  <NFormItem label="Дата выполнения" prop="dateRange" :error="formError.dateRange">
-                    <NDatePicker
-                      v-model="formData.dateRange"
-                      type="daterange"
-                      range-separator="До"
-                      value-format="YYYY-MM-DD"
-                      start-placeholder="Дата начала"
-                      end-placeholder="Дата конца"
-                      :disabled-date="disabledDate"
+                <ElRow :gutter="20">
+                  <ElCol :span="24">
+                    <NUserSelect
+                      v-model:search="search"
+                      :users="userOptions"
+                      @select="handleSelectUser"
+                      @unselect="handleUnselectUser"
                     />
-                  </NFormItem>
-                </ElCol>
-              </ElRow>
+                  </ElCol>
+                </ElRow>
 
-              <ElRow>
-                <ElCol class="form-actions">
-                  <NButton appearance="primary" @click="submitForm(formRef)"> Редактировать </NButton>
-                  <!-- <NButton @click="resetForm(formRef)">Сбросить</NButton> -->
-                  <NButton plain @click="router.back()"> Назад </NButton>
-                </ElCol>
-              </ElRow>
-            </ElCol>
-            <ElCol :span="14">
-              <ElRow :gutter="24">
-                <ElCol :span="24">
-                  <NFormItem label="Описание" hide-hint>
-                    <VEditor v-model="formData.description" />
-                  </NFormItem>
-                </ElCol>
-              </ElRow>
-              <div class="update-task-page__upload">
-                <NUpload
-                  v-model:file-list="fileList"
-                  :action="uploadUrl"
-                  multiple
-                  name="file"
-                  :on-preview="handlePreview"
-                  :on-remove="handleRemove"
-                  :before-remove="beforeRemove"
-                >
-                  <NButton appearance="primary">Добавить файл</NButton>
-                </NUpload>
-              </div>
-            </ElCol>
-          </ElRow>
-        </NForm>
-      </ElCard>
+                <ElRow :gutter="20">
+                  <ElCol :span="12">
+                    <NFormItem label="Важность" prop="importance" :error="formError.importance">
+                      <NSelect v-model="formData.importance" style="width: 100%" placeholder="Выберите">
+                        <NOption
+                          v-for="item in Object.values(IMPORTANCE)"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                        />
+                      </NSelect>
+                    </NFormItem>
+                  </ElCol>
+
+                  <ElCol :span="12">
+                    <NFormItem label="Статус" prop="status" :error="formError.status">
+                      <NSelect v-model="formData.status" style="width: 100%" placeholder="Выберите">
+                        <NOption
+                          v-for="item in statusOptions"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                          :disabled="item.disabled"
+                        >
+                          <div class="status-option">
+                            <span class="status-option__color" :style="{ '--status-color': item.color }" />
+                            <span class="status-option__label">
+                              {{ item.label }}
+                            </span>
+                          </div>
+                        </NOption>
+                      </NSelect>
+                    </NFormItem>
+                  </ElCol>
+                </ElRow>
+
+                <ElRow :gutter="20">
+                  <ElCol :span="24">
+                    <VTitle class="form__subtitle" level="3">Связанные задачи</VTitle>
+                  </ElCol>
+                </ElRow>
+
+                <ElRow :gutter="20">
+                  <ElCol :span="24">
+                    <NTaskRelations
+                      :depends="formData.depends"
+                      :affects="formData.affects"
+                      class="form__relations"
+                      :tasks="tasks"
+                      @update:depends="handleDepends"
+                      @update:affects="handleAffects"
+                    />
+                  </ElCol>
+                </ElRow>
+
+                <ElRow :gutter="20">
+                  <ElCol :span="24">
+                    <NFormItem label="Дата выполнения" prop="dateRange" :error="formError.dateRange">
+                      <NDatePicker
+                        v-model="formData.dateRange"
+                        type="daterange"
+                        range-separator="До"
+                        value-format="YYYY-MM-DDTHH:mm:ss[+00:00]"
+                        start-placeholder="Дата начала"
+                        end-placeholder="Дата конца"
+                        :disabled-date="disabledDate"
+                      />
+                    </NFormItem>
+                  </ElCol>
+                </ElRow>
+
+                <ElRow>
+                  <ElCol class="form-actions">
+                    <NButton appearance="primary" @click="submitForm()"> Редактировать </NButton>
+                    <!-- <NButton @click="resetForm(formRef)">Сбросить</NButton> -->
+                    <NButton plain @click="router.back()"> Назад </NButton>
+                  </ElCol>
+                </ElRow>
+              </ElCol>
+              <ElCol :span="14">
+                <ElRow :gutter="24">
+                  <ElCol :span="24">
+                    <NFormItem label="Описание" hide-hint>
+                      <NEditor v-model="formData.description" />
+                    </NFormItem>
+                  </ElCol>
+                </ElRow>
+              </ElCol>
+            </ElRow>
+          </NForm>
+        </ElCard>
+        <NNotFound v-else />
+      </div>
     </div>
   </NScrollbar>
 </template>
 
 <style>
+.update-task-page__scrollbar-view {
+  height: 100%;
+}
+
 .update-task-page {
+  height: 100%;
+}
+
+.update-task-page__inner {
   padding: 2rem;
 }
 

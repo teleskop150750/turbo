@@ -16,7 +16,6 @@
     "lint:style:fix": "stylelint --fix \"**/*.{css,vue}\""
   },
   "dependencies": {
-    "@dhtmlx/trial-vue-gantt": "^1.1.2",
     "@element-plus/icons-vue": "^2.0.9",
     "@nado/nado-vue-ui": "workspace:*",
     "@nado/ui": "workspace:*",

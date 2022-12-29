@@ -2,9 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import { loadLayout } from './layout/loadLayout.js'
 import auth from './middleware/auth.middleware.js'
+import authUnverify from './middleware/authUnverify.middleware.js'
 import guest from './middleware/guest.middleware.js'
 import middlewarePipeline from './middleware/middlewarePipeline.js'
-import unverify from './middleware/unverify.middleware.js'
 import verify from './middleware/verify.middleware.js'
 
 const routes = [
@@ -59,7 +59,7 @@ const routes = [
     component: () => import('../pages/Auth/VerifyEmail/IndexView.vue'),
     meta: {
       layout: 'login',
-      middleware: [auth, unverify],
+      middleware: [authUnverify],
     },
   },
   {
@@ -68,7 +68,7 @@ const routes = [
     component: () => import('../pages/Auth/VerificationNotification/IndexView.vue'),
     meta: {
       layout: 'login',
-      middleware: [auth],
+      middleware: [authUnverify],
     },
   },
   {
@@ -91,8 +91,8 @@ const routes = [
     },
   },
   {
-    path: '/folders/update/:id',
-    name: 'folders-update',
+    path: '/folders/:id/update',
+    name: 'folder-update',
     component: () => import('../pages/Folder/Update/IndexView.vue'),
     meta: {
       layout: 'default',
@@ -111,8 +111,8 @@ const routes = [
     },
   },
   {
-    path: '/tasks/update/:id',
-    name: 'tasks-update',
+    path: '/tasks/:id/update',
+    name: 'task-update',
     component: () => import('../pages/Task/Update/IndexView.vue'),
     meta: {
       layout: 'default',
@@ -129,24 +129,15 @@ const routes = [
   //     middleware: [auth],
   //   },
   // },
-  // {
-  //   path: '/workspace',
-  //   name: 'workspace',
-  //   component: () => import('../pages/Workspace/Index.vue'),
-  //   meta: {
-  //     layout: 'default',
-  //     middleware: [auth],
-  //   },
-  // },
-  // {
-  //   path: '/workspace-gantt',
-  //   name: 'workspace-gantt',
-  //   component: () => import('../pages/Workspace/Gantt.vue'),
-  //   meta: {
-  //     layout: 'default',
-  //     middleware: [auth],
-  //   },
-  // },
+  {
+    path: '/menu-edit',
+    name: 'menu-edit',
+    component: () => import('../pages/MenuEdit/IndexView.vue'),
+    meta: {
+      layout: 'default',
+      middleware: [auth],
+    },
+  },
   {
     path: '/all',
     name: 'tasks-all',
@@ -175,9 +166,9 @@ const routes = [
     },
   },
   {
-    path: '/unassembled',
-    name: 'tasks-unassembled',
-    component: () => import('../pages/Tasks/Unassembled/IndexView.vue'),
+    path: '/indefinite',
+    name: 'tasks-indefinite',
+    component: () => import('../pages/Tasks/Indefinite/IndexView.vue'),
     meta: {
       layout: 'default',
       middleware: [auth],

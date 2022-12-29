@@ -26,10 +26,10 @@ async function getDataInit() {
   try {
     await Promise.all([getTasks()])
   } catch (error) {
-    if (error.data && error.data.title) {
+    if (error.response.data.title) {
       openNotification({
         title: 'Error',
-        message: error.data.title,
+        message: error.response.data.title,
         type: 'error',
       })
     }
@@ -44,12 +44,29 @@ async function getTasks() {
 }
 
 getDataInit()
+
+async function handleDelete(id) {
+  openLoading()
+  try {
+    await TaskService.delete(id)
+    await Promise.all([getTasks()])
+  } catch (error) {
+    if (error.response.data.title) {
+      openNotification({
+        title: 'Error',
+        message: error.response.data.title,
+        type: 'error',
+      })
+    }
+  }
+  closeLoading()
+}
 </script>
 
 <template>
   <NTrackerTabPanel>
     <template #table>
-      <NTasksTable :data="tableTasks" />
+      <NTasksTable :data="tableTasks" @delete="handleDelete" />
     </template>
     <template #chart>
       <NChart :tasks="tasks" />

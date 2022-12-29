@@ -1,8 +1,9 @@
 <script setup>
-import { computed, inject, ref } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import NChart from '../../../components/NChart/NChart.vue'
+import NNotFound from '../../../components/NNotFound/NNotFound.vue'
 import NTasksTable from '../../../components/NTasksTable/NTasksTable.vue'
 import NTrackerTabPanel from '../../../components/NTrackerTabPanel/NTrackerTabPanel.vue'
 import { useLoading } from '../../../composables/useLoading.js'
@@ -17,6 +18,7 @@ layout.setTitle('Папка')
 const route = useRoute()
 const { open: openLoading, close: closeLoading } = useLoading()
 const { open: openNotification } = useNotification()
+const isFoundFolder = ref(true)
 const tasks = ref([])
 
 const tableTasks = computed(() =>
@@ -28,10 +30,10 @@ async function getDataInit() {
   try {
     await Promise.all([getTasks(), getFolder()])
   } catch (error) {
-    if (error.data && error.data.title) {
+    if (error.response.data.title) {
       openNotification({
         title: 'Error',
-        message: error.data.title,
+        message: error.response.data.title,
         type: 'error',
       })
     }
@@ -46,22 +48,55 @@ async function getTasks() {
 }
 
 async function getFolder() {
-  const response = await FolderService.getFolder(route.params.id)
-  const responseFolder = response.data.data
+  try {
+    const response = await FolderService.getFolder(route.params.id)
+    const responseFolder = response.data.data
 
-  layout.setTitle(responseFolder.name)
+    layout.setTitle(responseFolder.name)
+  } catch (error) {
+    isFoundFolder.value = false
+    layout.setTitle('404')
+    throw error
+  }
 }
 
 getDataInit()
+
+async function handleDelete(id) {
+  openLoading()
+  try {
+    await TaskService.delete(id)
+    await Promise.all([getTasks()])
+  } catch (error) {
+    if (error.response.data.title) {
+      openNotification({
+        title: 'Error',
+        message: error.response.data.title,
+        type: 'error',
+      })
+    }
+  }
+  closeLoading()
+}
+
+watch(
+  () => route.params.id,
+  async (newId) => {
+    if (newId) {
+      getDataInit()
+    }
+  },
+)
 </script>
 
 <template>
-  <NTrackerTabPanel>
+  <NTrackerTabPanel v-if="isFoundFolder">
     <template #table>
-      <NTasksTable :data="tableTasks" />
+      <NTasksTable :data="tableTasks" @delete="handleDelete" />
     </template>
     <template #chart>
       <NChart :tasks="tasks" />
     </template>
   </NTrackerTabPanel>
+  <NNotFound v-else />
 </template>

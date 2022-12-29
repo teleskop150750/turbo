@@ -183,7 +183,7 @@
 
 /* n-select-v2-dropdown */
 .n-select-v2-dropdown__item {
-  height: auto;
+  height: 100%;
 }
 
 /* n-form-item */

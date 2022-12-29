@@ -73,6 +73,7 @@ async function submitForm(formElement) {
       department: formData.department,
       phone: formData.phone,
     }
+
     userStore.updateUser(newUser)
     openNotification({
       title: 'Успех',
@@ -80,8 +81,8 @@ async function submitForm(formElement) {
       type: 'success',
     })
   } catch (error) {
-    if (error.data.errors) {
-      Object.entries(error.data.errors).forEach(([key, errors]) => {
+    if (error.response.data.errors) {
+      Object.entries(error.response.data.errors).forEach(([key, errors]) => {
         if (Object.hasOwn(formError, key)) {
           const [firstError] = errors
 
@@ -90,10 +91,10 @@ async function submitForm(formElement) {
       })
     }
 
-    if (error.data.message) {
+    if (error.response.data.title) {
       openNotification({
         title: 'Error',
-        message: error.data.message,
+        message: error.response.data.title,
         type: 'error',
       })
     }
@@ -121,6 +122,13 @@ const rules = reactive({
       status-icon
       label-position="top"
     >
+      <ElRow :gutter="20">
+        <ElCol :span="24">
+          <NFormItem label="Email">
+            <NInput :model-value="user.email" disabled />
+          </NFormItem>
+        </ElCol>
+      </ElRow>
       <ElRow :gutter="20">
         <ElCol :span="24">
           <NFormItem label="Фамилия" prop="lastName" :error="formError.lastName">

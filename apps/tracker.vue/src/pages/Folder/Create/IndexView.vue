@@ -6,15 +6,17 @@ import { computed, inject, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import NFolderOption from '../../../components/NFolderOption/NFolderOption.vue'
-import UserSelect from '../../../components/UserSelect/UserSelect.vue'
+import NUserSelect from '../../../components/NUserSelect/NUserSelect.vue'
 import VTitle from '../../../components/VTitle/VTitle.vue'
 import { useLoading } from '../../../composables/useLoading.js'
 import { useNotification } from '../../../composables/useNotification.js'
 import { FolderService } from '../../../services/FolderService.js'
 import { UserService } from '../../../services/UserService.js'
+import { useMenuStore } from '../../../store/menu.js'
 import { useUserStore } from '../../../store/user.js'
 import { LAYOUT_DEFAULT_KEY } from '../../../tokens/layout-default.js'
 
+const menuStore = useMenuStore()
 const layout = inject(LAYOUT_DEFAULT_KEY)
 
 layout.setTitle('Добавить папку')
@@ -126,8 +128,8 @@ async function submitForm(formElement) {
       type: 'success',
     })
   } catch (error) {
-    if (error.request.data.errors) {
-      Object.entries(error.request.data.errors).forEach(([key, errors]) => {
+    if (error.response.data.errors) {
+      Object.entries(error.response.data.errors).forEach(([key, errors]) => {
         if (Object.hasOwn(formError, key)) {
           const [firstError] = errors
 
@@ -136,10 +138,10 @@ async function submitForm(formElement) {
       })
     }
 
-    if (error.request.data.title) {
+    if (error.response.data.title) {
       openNotification({
         title: 'Error',
-        message: error.request.data.title,
+        message: error.response.data.title,
         type: 'error',
       })
     }
@@ -178,6 +180,7 @@ async function getFolders() {
   const response = await FolderService.getFolders()
 
   folders.value = response.data.data
+  menuStore.setUserFolders(response.data.data)
 
   const rootFolder = response.data.data.find((folder) => folder.type === 'ROOT') || null
 
@@ -241,7 +244,7 @@ getDataInit()
 
           <ElRow :gutter="20">
             <ElCol :span="24">
-              <UserSelect
+              <NUserSelect
                 v-model:search="search"
                 :users="userOptions"
                 @select="handleSelectUser"

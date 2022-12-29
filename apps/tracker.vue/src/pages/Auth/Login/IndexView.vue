@@ -88,14 +88,6 @@ async function submitForm(formElement) {
   }
 }
 
-function resetForm(formElement) {
-  if (!formElement) {
-    return
-  }
-
-  formElement.resetFields()
-}
-
 const rules = reactive({
   email: [{ required: true, message: 'Поле обязательно для заполнения', trigger: 'blur' }],
   password: [{ required: true, message: 'Поле обязательно для заполнения', trigger: 'blur' }],
@@ -128,7 +120,6 @@ const rules = reactive({
           <ElCol class="form-actions">
             <div class="form-actions__column">
               <NButton appearance="primary" @click="submitForm(formRef)"> Войти </NButton>
-              <NButton @click="resetForm(formRef)"> Сбросить </NButton>
             </div>
             <div class="form-actions__column">
               <NButton :to="{ name: 'forgot-password' }"> Забыли пароль </NButton>

@@ -10,15 +10,15 @@ defineProps({
 
 const emit = defineEmits(['delete'])
 
-function deleteTask(task) {
-  emit('delete', task)
+function deleteTask(id) {
+  emit('delete', id)
 }
 </script>
 
 <template>
   <div class="n-task-relations-block-item">
     <div class="n-task-relations-block-item__name">{{ task.value.name }}</div>
-    <button class="n-task-relations-block-item__delete" type="button" aria-label="delete" @click="deleteTask(task)">
+    <button class="n-task-relations-block-item__delete" type="button" aria-label="delete" @click="deleteTask(task.id)">
       <NIconDelete class="n-task-relations-block-item__delete-icon" />
     </button>
   </div>
