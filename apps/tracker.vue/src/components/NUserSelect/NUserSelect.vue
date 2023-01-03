@@ -14,12 +14,59 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  selected: {
+    type: Array,
+    default: () => [],
+  },
+  disabled: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const emit = defineEmits(['update:search', 'select', 'unselect'])
 
-const availableUsers = computed(() => props.users.filter((el) => !el.disabled))
-const selectedUsers = computed(() => props.users.filter((el) => el.selected))
+const userOptions = computed(() =>
+  props.users.map((user) => {
+    let selected = false
+    let disabled = false
+    const selectedIds = props.selected.map((item) => item.id)
+    const disabledIds = props.disabled.map((item) => item.id)
+
+    if (selectedIds.includes(user.id)) {
+      selected = true
+    }
+
+    if (disabledIds.includes(user.id)) {
+      disabled = true
+    }
+
+    return {
+      value: user,
+      label: `${user.fullName.firstName[0]}. ${user.fullName.lastName}`,
+      disabled,
+      selected,
+    }
+  }),
+)
+
+const availableUsers = computed(() => userOptions.value.filter((el) => !el.disabled))
+const selectedUsers = computed(() =>
+  props.selected.map((user) => {
+    let disabled = false
+    const disabledIds = props.disabled.map((item) => item.id)
+
+    if (disabledIds.includes(user.id)) {
+      disabled = true
+    }
+
+    return {
+      value: user,
+      label: `${user.fullName.firstName[0]}. ${user.fullName.lastName}`,
+      disabled,
+    }
+  }),
+)
 const availableSelectedUsers = computed(() => availableUsers.value.filter((el) => el.selected))
 
 const isSelectAll = computed(() => {
@@ -42,12 +89,12 @@ function handleSelectAll(value) {
   if (value) {
     emit(
       'select',
-      props.users.filter((el) => !el.disabled && !el.selected),
+      userOptions.value.filter((el) => !el.disabled && !el.selected),
     )
   } else {
     emit(
       'unselect',
-      props.users.filter((el) => !el.disabled && el.selected),
+      userOptions.value.filter((el) => !el.disabled && el.selected),
     )
   }
 }
@@ -80,7 +127,14 @@ function handleSelect(value, user) {
     </div>
 
     <div class="n-user-select__body">
-      <NVirtualList :scrollbar-always-on="true" :cache="3" :height="46 * 5" :item-size="46" :data="users">
+      <NVirtualList
+        v-if="userOptions.length > 0"
+        :scrollbar-always-on="true"
+        :cache="3"
+        :height="46 * 5"
+        :item-size="46"
+        :data="userOptions"
+      >
         <template #default="{ index, style, data }">
           <div class="n-user-select__item" :class="[index % 2 === 0 && 'scrollbar-demo-item--white']" :style="style">
             <div class="n-user-select__item-avatar">
@@ -102,6 +156,7 @@ function handleSelect(value, user) {
           </div>
         </template>
       </NVirtualList>
+      <p v-else class="n-user-select__not-found">Пользователи не найдены</p>
     </div>
 
     <div class="n-user-select__footer">
@@ -246,5 +301,9 @@ function handleSelect(value, user) {
 
   width: 100%;
   height: 100%;
+}
+
+.n-user-select__not-found {
+  padding: 0 1rem;
 }
 </style>

@@ -38,7 +38,11 @@ export const UserService = {
     return http.post('api/v1/login', payload)
   },
 
-  getUsers() {
-    return http.get('api/v1/users')
+  getUsers(search = null) {
+    return http.get('api/v1/users', {
+      params: {
+        search,
+      },
+    })
   },
 }

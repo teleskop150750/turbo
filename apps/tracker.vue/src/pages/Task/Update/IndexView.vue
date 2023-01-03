@@ -11,6 +11,7 @@ import {
   NSelect,
   NSelectV2,
 } from '@nado/nado-vue-ui'
+import { useDebounceFn } from '@vueuse/core'
 import { ElCard, ElCol, ElRow } from 'element-plus'
 import { computed, inject, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -68,7 +69,7 @@ const task = ref()
 const users = ref([])
 const folders = ref([])
 const tasks = ref([])
-const wasStarted = ref(false)
+// const wasStarted = ref(false)
 const isFoundFolder = ref(true)
 
 const { minDate } = useRelationsDateRange(tasks, formData)
@@ -79,23 +80,6 @@ const folderOptions = computed(() =>
     value: folder,
     label: `${folder.name}`,
   })),
-)
-
-const userOptions = computed(() =>
-  users.value.map((user) => {
-    let selected = false
-
-    if (formData.executors.includes(user.id)) {
-      selected = true
-    }
-
-    return {
-      value: user,
-      label: `${user.fullName.firstName[0]}. ${user.fullName.lastName}`,
-      disabled: false,
-      selected,
-    }
-  }),
 )
 
 const canStart = computed(() => {
@@ -116,7 +100,7 @@ const canStart = computed(() => {
 function handleSelectUser(_users) {
   _users.forEach((user) => {
     if (!formData.executors.includes(user.value.id)) {
-      formData.executors.push(user.value.id)
+      formData.executors.push(user.value)
     }
   })
 }
@@ -124,7 +108,16 @@ function handleSelectUser(_users) {
 function handleUnselectUser(_users) {
   const ids = new Set(_users.map((el) => el.value.id))
 
-  formData.executors = formData.executors.filter((el) => !ids.has(el))
+  formData.executors = formData.executors.filter((el) => !ids.has(el.id))
+}
+
+const searchUsers = useDebounceFn(() => {
+  getUsers(search.value)
+}, 100)
+
+function handleSearchUser(payload = null) {
+  search.value = payload
+  searchUsers()
 }
 
 const statusOptions = computed(() => {
@@ -173,11 +166,16 @@ async function submitForm() {
   }
 
   try {
-    if (formData.status === STATUSES.IN_WORK.value) {
-      wasStarted.value = true
-    }
+    // if (formData.status === STATUSES.IN_WORK.value) {
+    //   wasStarted.value = true
+    // }
 
-    const payload = { ...formData, startDate: formData.dateRange[0], endDate: formData.dateRange[1] }
+    const payload = {
+      ...formData,
+      startDate: formData.dateRange[0],
+      endDate: formData.dateRange[1],
+      executors: formData.executors.map((el) => el.id),
+    }
 
     delete payload.dateRange
 
@@ -270,8 +268,8 @@ async function getData() {
   }
 }
 
-async function getUsers() {
-  const response = await UserService.getUsers()
+async function getUsers(searchVal = null) {
+  const response = await UserService.getUsers(searchVal)
 
   users.value = response.data.data
 }
@@ -295,7 +293,7 @@ async function getTask() {
     formData.status = responseTask.status
     formData.dateRange = [responseTask.startDate, responseTask.endDate]
     formData.description = responseTask.description
-    formData.executors = responseTask.executors.map((user) => user.id)
+    formData.executors = responseTask.executors
     formData.folders = responseTask.folders.map((folder) => folder.id)
     formData.depends = responseTask.taskRelationships.map((rel) => rel.right.id)
     formData.affects = responseTask.inverseTaskRelationships.map((rel) => rel.left.id)
@@ -421,8 +419,10 @@ watch(
                 <ElRow :gutter="20">
                   <ElCol :span="24">
                     <NUserSelect
-                      v-model:search="search"
-                      :users="userOptions"
+                      :search="search"
+                      :users="users"
+                      :selected="formData.executors"
+                      @update:search="handleSearchUser"
                       @select="handleSelectUser"
                       @unselect="handleUnselectUser"
                     />

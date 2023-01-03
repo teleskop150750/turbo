@@ -1,7 +1,8 @@
 <script setup>
 import { NButton, NForm, NFormItem, NInput, NScrollbar } from '@nado/nado-vue-ui'
+import { useDebounceFn } from '@vueuse/core'
 import { ElCard, ElCol, ElRow } from 'element-plus'
-import { computed, inject, reactive, ref } from 'vue'
+import { inject, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import NNotFound from '../../../components/NNotFound/NNotFound.vue'
@@ -35,39 +36,14 @@ const formError = reactive({
 
 const search = ref('')
 const users = ref([])
+const usersDisabled = ref([])
 const folder = ref()
 const isFoundFolder = ref(true)
-
-const userOptions = computed(() => {
-  if (!folder.value) {
-    return []
-  }
-
-  const folderAuthorId = folder.value.author.id
-  const folderUsersIds = new Set([folder.value.author.id, ...formData.sharedUsers])
-
-  return users.value.map((user) => {
-    let selected = false
-
-    if (folderUsersIds.has(user.id)) {
-      selected = true
-    }
-
-    const disabled = user.id === folderAuthorId
-
-    return {
-      value: user,
-      label: `${user.fullName.firstName[0]}. ${user.fullName.lastName}`,
-      disabled,
-      selected,
-    }
-  })
-})
 
 function handleSelectUser(_users) {
   _users.forEach((user) => {
     if (!formData.sharedUsers.includes(user.value.id)) {
-      formData.sharedUsers.push(user.value.id)
+      formData.sharedUsers.push(user.value)
     }
   })
 }
@@ -75,7 +51,16 @@ function handleSelectUser(_users) {
 function handleUnselectUser(_users) {
   const ids = new Set(_users.map((el) => el.value.id))
 
-  formData.sharedUsers = formData.sharedUsers.filter((el) => !ids.has(el))
+  formData.sharedUsers = formData.sharedUsers.filter((el) => !ids.has(el.id))
+}
+
+const searchUsers = useDebounceFn(() => {
+  getUsers(search.value)
+}, 100)
+
+function handleSearchUser(payload = null) {
+  search.value = payload
+  searchUsers()
 }
 
 async function submitForm(formEl) {
@@ -106,7 +91,10 @@ async function submitForm(formEl) {
   }
 
   try {
-    await FolderService.update(id.value, formData)
+    const payload = { ...formData }
+
+    payload.sharedUsers = payload.sharedUsers.map((el) => el.id)
+    await FolderService.update(id.value, payload)
 
     openNotification({
       title: 'Успех',
@@ -153,8 +141,8 @@ async function getData() {
   }
 }
 
-async function getUsers() {
-  const response = await UserService.getUsers()
+async function getUsers(searchVal = null) {
+  const response = await UserService.getUsers(searchVal)
 
   users.value = response.data.data
 }
@@ -165,11 +153,11 @@ async function getFolder() {
     const responseFolder = response.data.data
 
     folder.value = responseFolder
-    const allSharedIds = responseFolder.sharedUsers.map((user) => user.id)
+    usersDisabled.value.push(responseFolder.author)
 
     id.value = responseFolder.id
     formData.name = responseFolder.name
-    formData.sharedUsers = allSharedIds
+    formData.sharedUsers = responseFolder.sharedUsers
   } catch (error) {
     layout.setTitle('404')
     isFoundFolder.value = false
@@ -215,8 +203,11 @@ getDataInit()
           <ElRow :gutter="20">
             <ElCol :span="24">
               <NUserSelect
-                v-model:search="search"
-                :users="userOptions"
+                :search="search"
+                :users="users"
+                :selected="[...formData.sharedUsers, ...usersDisabled]"
+                :disabled="usersDisabled"
+                @update:search="handleSearchUser"
                 @select="handleSelectUser"
                 @unselect="handleUnselectUser"
               />

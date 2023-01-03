@@ -11,6 +11,7 @@ import {
   NSelect,
   NSelectV2,
 } from '@nado/nado-vue-ui'
+import { useDebounceFn } from '@vueuse/core'
 import { ElCard, ElCol, ElRow } from 'element-plus'
 import { v4 as uuid } from 'uuid'
 import { computed, inject, reactive, ref } from 'vue'
@@ -77,27 +78,10 @@ const folderOptions = computed(() =>
   })),
 )
 
-const userOptions = computed(() =>
-  users.value.map((user) => {
-    let selected = false
-
-    if (formData.executors.includes(user.id)) {
-      selected = true
-    }
-
-    return {
-      value: user,
-      label: `${user.fullName.firstName[0]}. ${user.fullName.lastName}`,
-      disabled: false,
-      selected,
-    }
-  }),
-)
-
 function handleSelectUser(_users) {
   _users.forEach((user) => {
     if (!formData.executors.includes(user.value.id)) {
-      formData.executors.push(user.value.id)
+      formData.executors.push(user.value)
     }
   })
 }
@@ -105,7 +89,16 @@ function handleSelectUser(_users) {
 function handleUnselectUser(_users) {
   const ids = new Set(_users.map((el) => el.value.id))
 
-  formData.executors = formData.executors.filter((el) => !ids.has(el))
+  formData.executors = formData.executors.filter((el) => !ids.has(el.id))
+}
+
+const searchUsers = useDebounceFn(() => {
+  getUsers(search.value)
+}, 100)
+
+function handleSearchUser(payload = null) {
+  search.value = payload
+  searchUsers()
 }
 
 async function submitForm(formElement) {
@@ -140,6 +133,7 @@ async function submitForm(formElement) {
       ...formData,
       startDate: formData.dateRange[0],
       endDate: formData.dateRange[1],
+      executors: formData.executors.map((el) => el.id),
     }
 
     delete payload.dateRange
@@ -236,8 +230,8 @@ async function getDataInit() {
   closeLoading()
 }
 
-async function getUsers() {
-  const response = await UserService.getUsers()
+async function getUsers(searchVal = null) {
+  const response = await UserService.getUsers(searchVal)
 
   users.value = response.data.data
 }
@@ -403,8 +397,10 @@ const disabledDate = (time) => {
                 <ElRow :gutter="20">
                   <ElCol :span="24">
                     <NUserSelect
-                      v-model:search="search"
-                      :users="userOptions"
+                      :search="search"
+                      :users="users"
+                      :selected="[...formData.executors]"
+                      @update:search="handleSearchUser"
                       @select="handleSelectUser"
                       @unselect="handleUnselectUser"
                     />
