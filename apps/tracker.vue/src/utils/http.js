@@ -12,6 +12,7 @@ http.interceptors.request.use((config) => {
 
   if (userStore.check().value) {
     config.headers['user-id'] = userStore.id().value
+    config.headers.Accept = 'application/json'
   }
 
   return config

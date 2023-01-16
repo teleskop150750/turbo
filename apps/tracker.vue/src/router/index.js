@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+import { authRoutes } from './auth.js'
+import { foldersRoutes } from './folders.js'
 import { loadLayout } from './layout/loadLayout.js'
 import auth from './middleware/auth.middleware.js'
-import authUnverify from './middleware/authUnverify.middleware.js'
-import guest from './middleware/guest.middleware.js'
 import middlewarePipeline from './middleware/middlewarePipeline.js'
 import verify from './middleware/verify.middleware.js'
+import { tasksRoutes } from './tasks.js'
 
 const routes = [
   {
@@ -18,59 +19,14 @@ const routes = [
     },
   },
   {
-    path: '/login',
-    name: 'login',
-    component: () => import('../pages/Auth/Login/IndexView.vue'),
+    path: '/test',
+    name: 'test',
+    component: () => import('../pages/test/Test.vue'),
     meta: {
       layout: 'login',
-      middleware: [guest],
     },
   },
-  {
-    path: '/register',
-    name: 'register',
-    component: () => import('../pages/Auth/Register/IndexView.vue'),
-    meta: {
-      layout: 'login',
-      middleware: [guest],
-    },
-  },
-  {
-    path: '/forgot-password',
-    name: 'forgot-password',
-    component: () => import('../pages/Auth/ForgotPassword/IndexView.vue'),
-    meta: {
-      layout: 'login',
-      middleware: [guest],
-    },
-  },
-  {
-    path: '/reset-password',
-    name: 'reset-password',
-    component: () => import('../pages/Auth/ResetPassword/IndexView.vue'),
-    meta: {
-      layout: 'login',
-      middleware: [guest],
-    },
-  },
-  {
-    path: '/email/verify',
-    name: 'email-verify',
-    component: () => import('../pages/Auth/VerifyEmail/IndexView.vue'),
-    meta: {
-      layout: 'login',
-      middleware: [authUnverify],
-    },
-  },
-  {
-    path: '/email/verification-notification',
-    name: 'verification-notification',
-    component: () => import('../pages/Auth/VerificationNotification/IndexView.vue'),
-    meta: {
-      layout: 'login',
-      middleware: [authUnverify],
-    },
-  },
+  ...authRoutes,
   {
     path: '/profile',
     name: 'profile',
@@ -81,54 +37,8 @@ const routes = [
     },
   },
 
-  {
-    path: '/folders/create',
-    name: 'folders-create',
-    component: () => import('../pages/Folder/Create/IndexView.vue'),
-    meta: {
-      layout: 'default',
-      middleware: [auth],
-    },
-  },
-  {
-    path: '/folders/:id/update',
-    name: 'folder-update',
-    component: () => import('../pages/Folder/Update/IndexView.vue'),
-    meta: {
-      layout: 'default',
-      middleware: [auth],
-    },
-    props: true,
-  },
-
-  {
-    path: '/tasks/create',
-    name: 'tasks-create',
-    component: () => import('../pages/Task/Create/IndexView.vue'),
-    meta: {
-      layout: 'default',
-      middleware: [auth],
-    },
-  },
-  {
-    path: '/tasks/:id/update',
-    name: 'task-update',
-    component: () => import('../pages/Task/Update/IndexView.vue'),
-    meta: {
-      layout: 'default',
-      middleware: [auth],
-    },
-    props: true,
-  },
-  // {
-  //   path: '/archive',
-  //   name: 'archive',
-  //   component: () => import('../pages/Archive/Index.vue'),
-  //   meta: {
-  //     layout: 'default',
-  //     middleware: [auth],
-  //   },
-  // },
+  ...foldersRoutes,
+  ...tasksRoutes,
   {
     path: '/menu-edit',
     name: 'menu-edit',
@@ -138,98 +48,6 @@ const routes = [
       middleware: [auth],
     },
   },
-  {
-    path: '/all',
-    name: 'tasks-all',
-    component: () => import('../pages/Tasks/All/IndexView.vue'),
-    meta: {
-      layout: 'default',
-      middleware: [auth],
-    },
-  },
-  {
-    path: '/author',
-    name: 'tasks-author',
-    component: () => import('../pages/Tasks/Author/IndexView.vue'),
-    meta: {
-      layout: 'default',
-      middleware: [auth],
-    },
-  },
-  {
-    path: '/executor',
-    name: 'tasks-executor',
-    component: () => import('../pages/Tasks/Executor/IndexView.vue'),
-    meta: {
-      layout: 'default',
-      middleware: [auth],
-    },
-  },
-  {
-    path: '/indefinite',
-    name: 'tasks-indefinite',
-    component: () => import('../pages/Tasks/Indefinite/IndexView.vue'),
-    meta: {
-      layout: 'default',
-      middleware: [auth],
-    },
-  },
-  {
-    path: '/folder-me',
-    name: 'folder-me',
-    component: () => import('../pages/Tasks/FolderMe/IndexView.vue'),
-    meta: {
-      layout: 'default',
-      middleware: [auth],
-    },
-  },
-  {
-    path: '/folder-shared',
-    name: 'folder-shared',
-    component: () => import('../pages/Tasks/FolderShared/IndexView.vue'),
-    meta: {
-      layout: 'default',
-      middleware: [auth],
-    },
-  },
-  {
-    path: '/folders/:id/tasks',
-    name: 'folder-tasks',
-    component: () => import('../pages/Tasks/Folder/IndexView.vue'),
-    meta: {
-      layout: 'default',
-      middleware: [auth],
-    },
-    props: true,
-  },
-  // {
-  //   path: '/shared',
-  //   name: 'shared',
-  //   component: () => import('../pages/Shared/Index.vue'),
-  //   meta: {
-  //     layout: 'default',
-  //     middleware: [auth],
-  //   },
-  // },
-
-  // {
-  //   path: '/created-tasks',
-  //   name: 'created-tasks',
-  //   component: () => import('../pages/Tasks/Created/Index.vue'),
-  //   meta: {
-  //     layout: 'default',
-  //     middleware: [auth],
-  //   },
-  // },
-  // {
-  //   path: '/main-tasks',
-  //   name: 'main-tasks',
-  //   component: () => import('../pages/Tasks/Main/Index.vue'),
-  //   meta: {
-  //     layout: 'default',
-  //     middleware: [auth],
-  //   },
-  // },
   {
     path: '/search',
     name: 'search',

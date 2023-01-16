@@ -54,6 +54,7 @@ importers:
       '@nado/nado-vue-ui': workspace:*
       '@nado/ui': workspace:*
       '@rushstack/eslint-patch': ^1.2.0
+      '@teleskop150750/resumable': ^0.0.6
       '@tiptap/core': ^2.0.0-beta.197
       '@tiptap/extension-underline': ^2.0.0-beta.209
       '@tiptap/starter-kit': ^2.0.0-beta.209
@@ -98,6 +99,7 @@ importers:
       stylelint-declaration-block-no-ignored-properties: ^2.6.0
       stylelint-order: ^5.0.0
       stylelint-semantic-groups: ^1.2.0
+      ts-md5: ^1.3.1
       unplugin-vue-define-options: ^0.12.7
       uuid: ^9.0.0
       vite: ^3.2.3
@@ -109,6 +111,7 @@ importers:
       '@nado/nado-gantt-chart': link:../../packages/gantt-chart
       '@nado/nado-vue-ui': link:../../packages/nado-vue
       '@nado/ui': link:../../packages/ui
+      '@teleskop150750/resumable': 0.0.6
       '@tiptap/core': 2.0.0-beta.209_rd5pjtxohzfgv2zee3iufpqkay
       '@tiptap/extension-underline': 2.0.0-beta.209_f4ffqkgz5d3wev7su7t7l2rrua
       '@tiptap/starter-kit': 2.0.0-beta.209_jpbjcwtxtditttqwduift4tnzi
@@ -129,6 +132,7 @@ importers:
       prosemirror-state: 1.4.2
       prosemirror-transform: 1.7.0
       prosemirror-view: 1.29.1
+      ts-md5: 1.3.1
       uuid: 9.0.0
       vue: 3.2.45
       vue-router: 4.1.6_vue@3.2.45
@@ -1602,6 +1606,10 @@ packages:
       prettier: 2.8.1
     dev: true
 
+  /@teleskop150750/resumable/0.0.6:
+    resolution: {integrity: sha512-+0yL2nzTPoghuVLkV5bhL4/iig3XsZxml5hGZGNZ53KZmPd+7Yr/Tz3r0o4J73XnxUoquXVi8h3otXKutn7zLA==}
+    dev: false
+
   /@teleskop150750/stylelint-config-css/0.0.49_stylelint@14.16.0:
     resolution: {integrity: sha512-FGUkTBcSzmw/oDQoNUjeHAnmULc3MDJLRl190keqSmpHYnHFzcXzuXWNiCElfPS7682j3Xhj/DgD4DU6v95tTA==}
     peerDependencies:
@@ -2988,7 +2996,7 @@ packages:
   /axios/0.27.2:
     resolution: {integrity: sha512-t+yRIyySRTp/wua5xEr+z1q60QmLq8ABsS5O9Me1AsE5dfKqgnCFzwiCZZ/cGNd1lq4/7akDWMxdhVlucjmnOQ==}
     dependencies:
-      follow-redirects: 1.15.2_debug@4.3.4
+      follow-redirects: 1.15.2
       form-data: 4.0.0
     transitivePeerDependencies:
       - debug
@@ -5681,6 +5689,16 @@ packages:
       readable-stream: 2.3.7
     dev: true
 
+  /follow-redirects/1.15.2:
+    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dev: false
+
   /follow-redirects/1.15.2_debug@4.3.4:
     resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
     engines: {node: '>=4.0'}
@@ -5691,6 +5709,7 @@ packages:
         optional: true
     dependencies:
       debug: 4.3.4
+    dev: true
 
   /for-in/1.0.2:
     resolution: {integrity: sha512-7EwmXrOjyL+ChxMhmG5lnW9MPt1aIeZEwKhQzoBUdTV0N3zuwWDZYVJatDvZ2OyzPUvdIAZDsCetk3coyMfcnQ==}
@@ -10104,6 +10123,11 @@ packages:
     resolution: {integrity: sha512-c1PTsA3tYrIsLGkJkzHF+w9F2EyxfXGo4UyJc4pFL++FMjnq0HJS69T3M7d//gKrFKwy429bouPescbjecU+Zw==}
     engines: {node: '>=8'}
     dev: true
+
+  /ts-md5/1.3.1:
+    resolution: {integrity: sha512-DiwiXfwvcTeZ5wCE0z+2A9EseZsztaiZtGrtSaY5JOD7ekPnR/GoIVD5gXZAlK9Na9Kvpo9Waz5rW64WKAWApg==}
+    engines: {node: '>=12'}
+    dev: false
 
   /ts-morph/16.0.0:
     resolution: {integrity: sha512-jGNF0GVpFj0orFw55LTsQxVYEUOCWBAbR5Ls7fTYE5pQsbW18ssTb/6UXx/GYAEjS+DQTp8VoTw0vqYMiaaQuw==}

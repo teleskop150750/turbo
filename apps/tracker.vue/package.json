@@ -17,9 +17,10 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.0.9",
+    "@nado/nado-gantt-chart": "workspace:*",
     "@nado/nado-vue-ui": "workspace:*",
     "@nado/ui": "workspace:*",
-    "@nado/nado-gantt-chart": "workspace:*",
+    "@teleskop150750/resumable": "^0.0.6",
     "@tiptap/core": "^2.0.0-beta.197",
     "@tiptap/extension-underline": "^2.0.0-beta.209",
     "@tiptap/starter-kit": "^2.0.0-beta.209",
@@ -40,6 +41,7 @@
     "prosemirror-state": "^1.4.2",
     "prosemirror-transform": "^1.7.0",
     "prosemirror-view": "^1.29.1",
+    "ts-md5": "^1.3.1",
     "uuid": "^9.0.0",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"

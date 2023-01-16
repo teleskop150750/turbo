@@ -12,6 +12,7 @@ import {
   NSelectV2,
 } from '@nado/nado-vue-ui'
 import { useDebounceFn } from '@vueuse/core'
+import { AxiosError, CanceledError } from 'axios'
 import { ElCard, ElCol, ElRow } from 'element-plus'
 import { computed, inject, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -19,6 +20,7 @@ import { useRoute, useRouter } from 'vue-router'
 import NEditor from '../../../components/NEditor/NEditor.vue'
 import NFolderOption from '../../../components/NFolderOption/NFolderOption.vue'
 import NNotFound from '../../../components/NNotFound/NNotFound.vue'
+import NUpload from '../../../components/NUpload/NUpload.vue'
 import NUserSelect from '../../../components/NUserSelect/NUserSelect.vue'
 import VTitle from '../../../components/VTitle/VTitle.vue'
 import { useLoading } from '../../../composables/useLoading.js'
@@ -69,6 +71,7 @@ const task = ref()
 const users = ref([])
 const folders = ref([])
 const tasks = ref([])
+const fileList = ref([])
 // const wasStarted = ref(false)
 const isFoundFolder = ref(true)
 
@@ -297,6 +300,14 @@ async function getTask() {
     formData.folders = responseTask.folders.map((folder) => folder.id)
     formData.depends = responseTask.taskRelationships.map((rel) => rel.right.id)
     formData.affects = responseTask.inverseTaskRelationships.map((rel) => rel.left.id)
+
+    console.log(responseTask.files);
+    fileList.value = responseTask.files.map((file) => ({
+      id: file.id,
+      name: file.name,
+      progress: '',
+      data: file,
+    }))
   } catch (error) {
     layout.setTitle('404')
     isFoundFolder.value = false
@@ -365,10 +376,67 @@ watch(
     }
   },
 )
+const handleSendChunk = async (chunk) => {
+  const data = chunk.getRequestChunk()
+  const params = chunk.getRequestParams()
+  const fileFormData = new FormData()
+
+  fileFormData.append('file', data, chunk.getResumableFile().getName())
+
+  try {
+    const response = await TaskService.addFile(formData.id, fileFormData, params, chunk)
+
+    chunk.doneSend(true, response.data)
+  } catch (error) {
+    if (error instanceof CanceledError) {
+      chunk.doneAbort()
+
+      return
+    }
+
+    if (error instanceof AxiosError) {
+      chunk.doneSend(false, true, error.response?.data)
+
+      return
+    }
+
+    chunk.doneSend(false, true)
+  }
+}
+
+async function handleRemoveFile(payload) {
+  const { data } = payload.data
+
+  try {
+    await TaskService.removeFile(data.id)
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+async function handlePreviewFile(payload) {
+  const { data } = payload.data
+
+  try {
+    const response = await TaskService.downloadFile(data.id)
+    const fileUrl = window.URL.createObjectURL(response.data)
+    const docUrl = document.createElement('a')
+
+    docUrl.href = fileUrl
+    docUrl.setAttribute('download', data.name)
+    document.body.append(docUrl)
+    docUrl.click()
+    docUrl.remove()
+    window.URL.revokeObjectURL(fileUrl)
+  } catch (error) {
+    console.error(error)
+  }
+}
 </script>
 
 <template>
   <NScrollbar view-class="update-task-page__scrollbar-view">
+    <!-- <pre>{{ fileList }}</pre> -->
     <div class="update-task-page">
       <div class="update-task-page__inner">
         <ElCard v-if="isFoundFolder" shadow="never" class="update-task-page__card">
@@ -516,6 +584,17 @@ watch(
                     </NFormItem>
                   </ElCol>
                 </ElRow>
+
+                <ElRow :gutter="24" class="update-task-page__upload-wrapper">
+                  <ElCol :span="24">
+                    <NUpload
+                      v-model:file-list="fileList"
+                      :on-send-chunk="handleSendChunk"
+                      :on-remove-file="handleRemoveFile"
+                      @preview="handlePreviewFile"
+                    />
+                  </ElCol>
+                </ElRow>
               </ElCol>
             </ElRow>
           </NForm>
@@ -555,5 +634,9 @@ watch(
 .form--update-task .form-actions {
   display: flex;
   gap: 1rem;
+}
+
+.update-task-page__upload-wrapper {
+  margin-top: 2rem;
 }
 </style>

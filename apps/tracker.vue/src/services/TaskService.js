@@ -45,20 +45,23 @@ export const TaskService = {
     return http.get(`api/v1/folder/${folderId}/tasks`)
   },
 
-  /// ////////////////
-  addFile(id, formData) {
-    return http.post(`api/v1/tasks/${id}/add-file`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
+  addFile(taskId, formData, params, chunk) {
+    return http.postForm(`api/v1/tasks/${taskId}/files`, formData, {
+      params,
+      signal: chunk.getController()?.signal,
+      onUploadProgress: (evt) => {
+        chunk.handleUploadProgress(evt)
       },
     })
   },
 
-  downloadFile(id) {
-    return http.get(`api/v1/task-file/${id}`)
+  downloadFile(taskId, fileId) {
+    return http.get(`api/v1/tasks/${taskId}/files/${fileId}`, {
+      responseType: 'blob',
+    })
   },
 
-  removeFile(id) {
-    return http.post(`api/v1/remove-task-file/${id}`)
+  removeFile(taskId, fileId) {
+    return http.delete(`api/v1/tasks/${taskId}/files/${fileId}`)
   },
 }
