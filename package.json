@@ -1,5 +1,5 @@
 {
-  "name": "@nado/monorepo",
+  "name": "@nadoapps/monorepo",
   "version": "0.0.0",
   "private": true,
   "workspaces": [
@@ -13,7 +13,6 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
-    "eslint-config-custom": "workspace:*",
     "prettier": "latest",
     "turbo": "latest"
   },

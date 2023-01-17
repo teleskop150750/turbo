@@ -1,5 +1,5 @@
 {
-  "name": "@nado/nado-gantt-chart",
+  "name": "@nadoapps/gantt-chart",
   "type": "module",
   "private": true,
   "version": "0.0.0",
