@@ -40,7 +40,7 @@ const link = computed(() => {
     return { name: 'folder-shared' }
   }
 
-  return { name: 'folder-tasks', params: { id: props.node.data.id } }
+  return { name: 'folder-tasks', params: { folderId: props.node.data.id } }
 })
 // v-if="link"
 </script>

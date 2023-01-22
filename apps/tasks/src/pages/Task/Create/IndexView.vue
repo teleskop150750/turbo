@@ -1,16 +1,6 @@
 <script setup>
-import { dayjs } from '@nadoapps/nado-gantt-chart'
-import {
-  NButton,
-  NDatePicker,
-  NForm,
-  NFormItem,
-  NInput,
-  NOption,
-  NScrollbar,
-  NSelect,
-  NSelectV2,
-} from '@nadoapps/ui'
+import { dayjs } from '@nadoapps/gantt-chart'
+import { NButton, NDatePicker, NForm, NFormItem, NInput, NOption, NScrollbar, NSelect, NSelectV2 } from '@nadoapps/ui'
 import { useDebounceFn } from '@vueuse/core'
 import { ElCard, ElCol, ElRow } from 'element-plus'
 import { v4 as uuid } from 'uuid'

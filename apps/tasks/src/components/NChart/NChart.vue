@@ -1,5 +1,5 @@
 <script setup>
-import { EDGE_TYPES, GanttChart } from '@nadoapps/nado-gantt-chart'
+import { EDGE_TYPES, GanttChart } from '@nadoapps/gantt-chart'
 import { NOption, NSelect } from '@nadoapps/ui'
 import { computedEager } from '@vueuse/core'
 import { computed, ref } from 'vue'

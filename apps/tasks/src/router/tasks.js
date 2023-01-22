@@ -57,7 +57,7 @@ export const tasksRoutes = [
     },
   },
   {
-    path: '/folders/:id/tasks',
+    path: '/folders/:folderId/tasks',
     name: 'folder-tasks',
     component: () => import('../pages/Tasks/Folder/IndexView.vue'),
     meta: {

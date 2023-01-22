@@ -1,0 +1,22 @@
+version: "3"
+
+networks:
+  proxy:
+    external: true
+
+services:
+  nginx:
+    container_name: tasks
+    build:
+      context: .
+      dockerfile: ./apps/tasks/.docker/Dockerfile
+    volumes:
+      - ./apps/tasks/.docker/nginx/sites:/etc/nginx/sites-enabled
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.vue_tasks.entrypoints=websecure"
+      - "traefik.http.routers.vue_tasks.rule=Host(`vuetasks.docker.localhost`)"
+      - "traefik.http.routers.vue_tasks.tls=true"
+    networks:
+      - proxy

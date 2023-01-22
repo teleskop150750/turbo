@@ -1,16 +1,6 @@
 <script setup>
-import { dayjs } from '@nadoapps/nado-gantt-chart'
-import {
-  NButton,
-  NDatePicker,
-  NForm,
-  NFormItem,
-  NInput,
-  NOption,
-  NScrollbar,
-  NSelect,
-  NSelectV2,
-} from '@nadoapps/ui'
+import { dayjs } from '@nadoapps/gantt-chart'
+import { NButton, NDatePicker, NForm, NFormItem, NInput, NOption, NScrollbar, NSelect, NSelectV2 } from '@nadoapps/ui'
 import { useDebounceFn } from '@vueuse/core'
 import { AxiosError, CanceledError } from 'axios'
 import { ElCard, ElCol, ElRow } from 'element-plus'
@@ -301,7 +291,6 @@ async function getTask() {
     formData.depends = responseTask.taskRelationships.map((rel) => rel.right.id)
     formData.affects = responseTask.inverseTaskRelationships.map((rel) => rel.left.id)
 
-    console.log(responseTask.files);
     fileList.value = responseTask.files.map((file) => ({
       id: file.id,
       name: file.name,
@@ -386,7 +375,7 @@ const handleSendChunk = async (chunk) => {
   try {
     const response = await TaskService.addFile(formData.id, fileFormData, params, chunk)
 
-    chunk.doneSend(true, response.data)
+    chunk.doneSend(true, response.data.data)
   } catch (error) {
     if (error instanceof CanceledError) {
       chunk.doneAbort()
@@ -405,13 +394,7 @@ const handleSendChunk = async (chunk) => {
 }
 
 async function handleRemoveFile(payload) {
-  const { data } = payload.data
-
-  try {
-    await TaskService.removeFile(data.id)
-  } catch (error) {
-    console.error(error)
-  }
+  await TaskService.removeFile(formData.id, payload.data.id)
 }
 
 async function handlePreviewFile(payload) {

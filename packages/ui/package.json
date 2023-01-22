@@ -22,10 +22,6 @@
     "access": "public"
   },
   "scripts": {
-    "dev": "vite --config vite.config.docs.js",
-    "build:lib": "vite --config vite.config.lib.js build && pnpm run build:css",
-    "build:css": "gulp",
-    "build:docs": "vite build --config vite.config.docs.js",
     "test": "echo test",
     "lint": "pnpm run prettier:fix && pnpm run lint:js:fix && pnpm run lint:style:fix",
     "prettier": "prettier --check --ignore-unknown \"**/*\"",

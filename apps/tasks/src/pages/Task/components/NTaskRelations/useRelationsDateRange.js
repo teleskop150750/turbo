@@ -1,4 +1,4 @@
-import { dayjs } from '@nadoapps/nado-gantt-chart'
+import { dayjs } from '@nadoapps/gantt-chart'
 import { computed } from 'vue'
 
 export const useRelationsDateRange = (tasks, formData) => {

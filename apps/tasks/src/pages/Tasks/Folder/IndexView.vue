@@ -22,7 +22,7 @@ const isFoundFolder = ref(true)
 const tasks = ref([])
 
 const tableTasks = computed(() =>
-  tasks.value.filter((taskEl) => taskEl.folders.some((folderEl) => folderEl.id === route.params.id)),
+  tasks.value.filter((taskEl) => taskEl.folders.some((folderEl) => folderEl.id === route.params.folderId)),
 )
 
 async function getDataInit() {
@@ -42,14 +42,14 @@ async function getDataInit() {
 }
 
 async function getTasks() {
-  const response = await TaskService.getFolderTasks(route.params.id)
+  const response = await TaskService.getFolderTasks(route.params.folderId)
 
   tasks.value = response.data.data
 }
 
 async function getFolder() {
   try {
-    const response = await FolderService.getFolder(route.params.id)
+    const response = await FolderService.getFolder(route.params.folderId)
     const responseFolder = response.data.data
 
     layout.setTitle(responseFolder.name)
@@ -80,7 +80,7 @@ async function handleDelete(id) {
 }
 
 watch(
-  () => route.params.id,
+  () => route.params.folderId,
   async (newId) => {
     if (newId) {
       getDataInit()
